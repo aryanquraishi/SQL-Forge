@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: 40 14% 97%;
+  --foreground: 330 10% 10%;
+  --card: 40 14% 97%;
+  --card-foreground: 330 10% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 330 10% 10%;
+  --primary: 25 76% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 10% 92%;
+  --secondary-foreground: 330 10% 10%;
+  --muted: 40 10% 92%;
+  --muted-foreground: 40 5% 45%;
+  --accent: 40 14% 93%;
+  --accent-foreground: 330 10% 10%;
+  --destructive: 1 56% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 40 6% 88%;
+  --input: 40 6% 82%;
+  --ring: 25 76% 47%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 220 20% 5%;
+  --foreground: 40 5% 95%;
+  --card: 220 14% 7%;
+  --card-foreground: 40 5% 95%;
+  --popover: 220 20% 5%;
+  --popover-foreground: 40 5% 95%;
+  --primary: 25 76% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 10% 12%;
+  --secondary-foreground: 40 5% 95%;
+  --muted: 220 10% 12%;
+  --muted-foreground: 220 5% 55%;
+  --accent: 220 10% 12%;
+  --accent-foreground: 40 5% 95%;
+  --destructive: 1 56% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 100% / 0.06;
+  --input: 0 0% 100% / 0.08;
+  --ring: 25 76% 47%;
+}
+
+* { border-color: hsl(var(--border)); }
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Nunito Sans', sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background-image:
+    radial-gradient(circle at 50% 0%, #111318, #0D1117),
+    linear-gradient(to right, rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+:root body {
+  background-image:
+    linear-gradient(to right, rgba(180,170,158,.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(180,170,158,.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+h1, h2, h3 { font-family: 'Literata', serif; }
+code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(120,113,108,.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(120,113,108,.5); }
+* { scrollbar-width: thin; scrollbar-color: rgba(120,113,108,.3) transparent; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-in { animation: fadeIn 0.4s ease-out; }
+
+/* Rotating Gradient Button */
+@property --r {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.rotatingGradient {
+  background: conic-gradient(from var(--r), #D4691E, #E8894A, #D4691E, #A84D12, #D4691E);
+  animation: rotating 3s linear infinite;
+}
+@keyframes rotating {
+  to { --r: 360deg; }
+}
+
+/* Section highlight when navigated to */
+@keyframes sectionPulse {
+  0% { box-shadow: 0 0 0 0 hsl(25 76% 47% / 0.4); }
+  50% { box-shadow: 0 0 0 6px hsl(25 76% 47% / 0.15); }
+  100% { box-shadow: 0 0 0 0 hsl(25 76% 47% / 0); }
+}
+.section-highlight {
+  animation: sectionPulse 1.2s ease-out;
+  outline: 2px solid hsl(25 76% 47% / 0.4);
+  outline-offset: 4px;
+  border-radius: 12px;
+  transition: outline-color 1.5s ease-out;
+}

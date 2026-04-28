@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Terra SQL Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#221a05",
+                        "on-surface-variant": "#4a4e4a",
+                        "inverse-surface": "#2e3230",
+                        "surface-container-low": "#f5f1ea",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#2e3230",
+                        "on-secondary-fixed-variant": "#4a4538",
+                        "secondary-fixed": "#f0e8db",
+                        "secondary-container": "#f0e8db",
+                        "surface-bright": "#faf6f0",
+                        "surface": "#faf6f0",
+                        "surface-container": "#f0ece4",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#f8e0a8",
+                        "on-background": "#2e3230",
+                        "inverse-on-surface": "#f5f0e8",
+                        "background": "#faf6f0",
+                        "tertiary-fixed-dim": "#dcc48e",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#c4a66a",
+                        "on-primary-fixed": "#002110",
+                        "on-primary-container": "#d8f0de",
+                        "surface-container-high": "#eae6de",
+                        "on-secondary-fixed": "#1e1a13",
+                        "on-secondary-container": "#5e5548",
+                        "secondary-fixed-dim": "#d4ccbf",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad8",
+                        "error": "#b83230",
+                        "outline": "#74796e",
+                        "tertiary": "#705c30",
+                        "on-primary-fixed-variant": "#2a6038",
+                        "outline-variant": "#c4c8bc",
+                        "on-tertiary-container": "#554020",
+                        "primary-container": "#78a886",
+                        "on-tertiary-fixed-variant": "#554020",
+                        "inverse-primary": "#8ecf9e",
+                        "primary-fixed": "#c8e8d0",
+                        "secondary": "#6b6358",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#690005",
+                        "surface-dim": "#dbd7cf",
+                        "primary": "#4a7c59",
+                        "surface-variant": "#e4e0d8",
+                        "surface-tint": "#4a7c59",
+                        "primary-fixed-dim": "#8ecf9e",
+                        "surface-container-highest": "#e4e0d8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Literata"],
+                        "display": ["Literata"],
+                        "body": ["Nunito Sans"],
+                        "label": ["Nunito Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .blueprint-grid {
+            background-size: 20px 20px;
+            background-image: linear-gradient(to right, rgba(196, 200, 188, 0.2) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(196, 200, 188, 0.2) 1px, transparent 1px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen blueprint-grid pb-24 relative overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-orange-50/90 dark:bg-slate-950/90 backdrop-blur-md text-emerald-800 dark:text-emerald-400 font-serif text-lg font-bold docked full-width top-0 z-50 border-b border-emerald-100/50 dark:border-emerald-900/30 shadow-sm flex justify-between items-center w-full px-4 h-16 transition-all duration-300 ease-in-out active:scale-95 fixed top-0">
+<button class="text-emerald-600/70 dark:text-emerald-500/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+</button>
+<h1 class="font-serif text-xl font-black text-emerald-900 dark:text-emerald-100">SQL Studio</h1>
+<button class="text-emerald-600/70 dark:text-emerald-500/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</header>
+<main class="pt-20 px-4 flex flex-col gap-6">
+<!-- Editor Section -->
+<section class="bg-inverse-surface rounded-xl p-4 shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden relative">
+<div class="flex items-center justify-between mb-3 border-b border-outline-variant/30 pb-2">
+<div class="flex items-center gap-2 text-surface-container-low font-label text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+<span>query.sql</span>
+</div>
+<div class="flex gap-2">
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label text-xs px-3 py-1 rounded-full transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="play_arrow">play_arrow</span>
+                        Run
+                    </button>
+</div>
+</div>
+<div class="font-mono text-sm text-surface-container-low whitespace-pre-wrap leading-relaxed opacity-90 overflow-x-auto">
+<span class="text-tertiary-container">SELECT</span> 
+    u.id, 
+    u.name, 
+    <span class="text-tertiary-container">COUNT</span>(o.id) <span class="text-tertiary-container">AS</span> total_orders
+<span class="text-tertiary-container">FROM</span> users u
+<span class="text-tertiary-container">LEFT JOIN</span> orders o <span class="text-tertiary-container">ON</span> u.id = o.user_id
+<span class="text-tertiary-container">WHERE</span> u.status = <span class="text-primary-fixed">'active'</span>
+<span class="text-tertiary-container">GROUP BY</span> u.id, u.name
+<span class="text-tertiary-container">ORDER BY</span> total_orders <span class="text-tertiary-container">DESC</span>;
+            </div>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<span class="w-2 h-2 rounded-full bg-outline-variant opacity-50"></span>
+<span class="w-2 h-2 rounded-full bg-outline-variant opacity-50"></span>
+<span class="w-2 h-2 rounded-full bg-outline-variant opacity-50"></span>
+</div>
+</section>
+<!-- Compilation Features (Collapsible Style Layout) -->
+<div class="grid grid-cols-1 gap-4">
+<!-- Token Stream -->
+<details class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden group">
+<summary class="p-4 flex items-center justify-between cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<div class="bg-secondary-container text-on-secondary-container p-2 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="segment">segment</span>
+</div>
+<h2 class="font-headline text-lg font-bold text-on-surface">Token Stream</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="p-4 border-t border-surface-variant bg-surface-bright text-sm text-on-surface-variant font-mono">
+                    [KEYWORD: SELECT], [IDENTIFIER: u], [PUNCTUATION: .], [IDENTIFIER: id], [PUNCTUATION: ,] ...
+                </div>
+</details>
+<!-- Parse Tree -->
+<details class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden group">
+<summary class="p-4 flex items-center justify-between cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<div class="bg-tertiary-container text-on-tertiary-container p-2 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+</div>
+<h2 class="font-headline text-lg font-bold text-on-surface">Parse Tree</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="p-4 border-t border-surface-variant bg-surface-bright text-sm text-on-surface-variant flex flex-col gap-2">
+<div class="pl-2 border-l-2 border-outline-variant">SelectStmt</div>
+<div class="pl-6 border-l-2 border-outline-variant ml-2">TargetList</div>
+<div class="pl-10 border-l-2 border-outline-variant ml-2 text-tertiary">ResTarget (u.id)</div>
+<div class="pl-10 border-l-2 border-outline-variant ml-2 text-tertiary">ResTarget (u.name)</div>
+</div>
+</details>
+<!-- Symbol Table -->
+<details class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden group">
+<summary class="p-4 flex items-center justify-between cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<div class="bg-primary-container text-on-primary-container p-2 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="vpn_key">vpn_key</span>
+</div>
+<h2 class="font-headline text-lg font-bold text-on-surface">Symbol Table</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="p-4 border-t border-surface-variant bg-surface-bright overflow-x-auto">
+<table class="w-full text-left text-sm text-on-surface-variant">
+<thead>
+<tr class="border-b border-surface-variant text-on-surface font-label">
+<th class="pb-2 pr-4 font-semibold">Symbol</th>
+<th class="pb-2 pr-4 font-semibold">Type</th>
+<th class="pb-2 font-semibold">Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-surface-variant/50">
+<td class="py-2 pr-4">u</td>
+<td class="py-2 pr-4">Alias</td>
+<td class="py-2">Global</td>
+</tr>
+<tr>
+<td class="py-2 pr-4">id</td>
+<td class="py-2 pr-4">Column</td>
+<td class="py-2">Local (u)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<!-- Optimization -->
+<details class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(46,50,48,0.06)] overflow-hidden group">
+<summary class="p-4 flex items-center justify-between cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<div class="bg-surface-variant text-on-surface-variant p-2 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="speed">speed</span>
+</div>
+<h2 class="font-headline text-lg font-bold text-on-surface">Optimization</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180" data-icon="expand_more">expand_more</span>
+</summary>
+<div class="p-4 border-t border-surface-variant bg-surface-bright text-sm text-on-surface-variant">
+<p class="mb-2"><strong>Rule applied:</strong> Predicate Pushdown</p>
+<p class="opacity-80 italic">Condition `u.status = 'active'` pushed to scan node.</p>
+</div>
+</details>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed bottom-24 right-4 bg-tertiary hover:bg-tertiary-container text-on-tertiary p-4 rounded-2xl shadow-lg transition-transform active:scale-95 z-40 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="bg-orange-50 dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 font-sans text-[11px] font-semibold tracking-wide fixed bottom-0 w-full z-50 border-t border-emerald-100 dark:border-emerald-900 shadow-[0_-4px_20px_rgba(46,50,48,0.06)] fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe md:hidden bg-surface-container-lowest text-on-surface border-t border-surface-variant">
+<a class="flex flex-col items-center justify-center bg-emerald-100/50 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100 rounded-xl px-3 py-1 tap-highlight-transparent active:scale-90 transition-transform flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-3 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="code" style="font-variation-settings: 'FILL' 1;">code</span>
+<span>Editor</span>
+</a>
+<a class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-500 opacity-60 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 tap-highlight-transparent active:scale-90 transition-transform flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:bg-surface-variant rounded-xl px-3 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="account_tree">account_tree</span>
+<span>Pipeline</span>
+</a>
+<a class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-500 opacity-60 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 tap-highlight-transparent active:scale-90 transition-transform flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:bg-surface-variant rounded-xl px-3 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="list_alt">list_alt</span>
+<span>Symbols</span>
+</a>
+<a class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-500 opacity-60 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 tap-highlight-transparent active:scale-90 transition-transform flex flex-col items-center justify-center text-on-surface-variant opacity-70 hover:bg-surface-variant rounded-xl px-3 py-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="psychology">psychology</span>
+<span>Terra AI</span>
+</a>
+</nav>
+</body></html>
