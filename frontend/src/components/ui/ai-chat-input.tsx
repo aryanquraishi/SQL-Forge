@@ -114,25 +114,6 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
           className
         )}
       >
-                <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={handleFileUpload}
-          disabled={disabled}
-          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
-        >
-          <Paperclip size={16} />
-          <span className="sr-only">Upload file</span>
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          onChange={handleFileChange}
-          accept="image/*,.pdf,.doc,.docx,.txt"
-          multiple
-          className="hidden"
-        />
         <form onSubmit={handleSubmit} className="flex w-full items-center gap-2">
           <input
             ref={inputRef}

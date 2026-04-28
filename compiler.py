@@ -87,6 +87,10 @@ class MiniSQLCompiler:
             result.is_valid = False
             result.syntax_message = "❌ Query has syntax errors"
             result.ast = None
+        elif lexer_errors.has_errors():
+            result.is_valid = False
+            result.syntax_message = "❌ Query has illegal characters"
+            result.ast = ast
         else:
             result.is_valid = True
             result.syntax_message = "✅ Query is syntactically VALID"
