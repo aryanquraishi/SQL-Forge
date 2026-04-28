@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: terra-sql-studio
+    name: SQL-Forge
     runtime: python
     buildCommand: cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt
     startCommand: python app.py

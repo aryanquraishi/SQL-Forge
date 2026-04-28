@@ -103,14 +103,8 @@ def chat():
     return jsonify({'response': response})
 
 
-@app.route('/api/format', methods=['POST'])
-def format_sql():
-    from utils import format_query
-    data = request.get_json()
-    query = data.get('query', '')
-    return jsonify({'formatted': format_query(query)})
-
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    is_dev = os.environ.get('RENDER') is None
+    app.run(host='0.0.0.0', port=port, debug=is_dev)
