@@ -66,7 +66,9 @@ export default function App() {
   return (
     <div className="h-screen flex overflow-hidden font-[Nunito_Sans]">
       {/* Sidebar */}
-      <nav className={`h-screen w-64 border-r border-border bg-card/80 backdrop-blur-xl flex-col py-6 shadow-lg z-20 shrink-0 ${sideOpen ? 'flex' : 'hidden'} md:flex`}>
+      {/* Mobile overlay backdrop */}
+      {sideOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSideOpen(false)} />}
+      <nav className={`fixed md:relative h-screen w-64 border-r border-border bg-card backdrop-blur-xl flex-col py-6 shadow-lg z-30 shrink-0 transition-transform duration-300 ${sideOpen ? 'flex translate-x-0' : 'flex -translate-x-full md:translate-x-0'}`}>
         <div className="px-6 mb-8 flex items-center gap-3">
           <SQLForgeLogo size={40} />
           <div>
@@ -94,6 +96,7 @@ export default function App() {
             <button key={item.id}
               onClick={() => {
                 setActiveNav(item.id)
+                setSideOpen(false)
                 const el = document.getElementById(item.target)
                 if (el) {
                   el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -132,9 +135,9 @@ export default function App() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeSwitch />
-            <button onClick={handleFormat} className="px-3 py-1.5 text-primary border border-primary/30 rounded-lg hover:bg-primary/10 text-sm transition-colors">Format</button>
-            <GradientButton onClick={handleCompile} width="120px" height="36px">
-              <Play className="w-4 h-4" /> Execute
+            <button onClick={handleFormat} className="hidden sm:block px-3 py-1.5 text-primary border border-primary/30 rounded-lg hover:bg-primary/10 text-sm transition-colors">Format</button>
+            <GradientButton onClick={handleCompile} width="100px" height="34px">
+              <Play className="w-4 h-4" /> <span className="hidden sm:inline">Execute</span><span className="sm:hidden">Run</span>
             </GradientButton>
           </div>
         </header>
@@ -321,12 +324,12 @@ export default function App() {
       {/* AI Chat — Floating Icon + Panel */}
       {!aiOpen && (
         <button onClick={() => setAiOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform md:bottom-6">
+          className="fixed bottom-4 right-4 z-50 w-12 h-12 md:w-14 md:h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform">
           <MessageCircle className="w-6 h-6" />
         </button>
       )}
       {aiOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[340px] h-[480px] bg-card/95 backdrop-blur-2xl rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-4 md:inset-auto md:bottom-6 md:right-6 z-50 md:w-[340px] md:h-[480px] bg-card/95 backdrop-blur-2xl rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           <div className="p-3 border-b border-border flex items-center justify-between bg-card/80">
             <div className="flex items-center gap-2">
