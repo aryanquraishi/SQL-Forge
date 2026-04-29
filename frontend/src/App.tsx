@@ -193,7 +193,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col h-screen relative">
+      <div className="flex-1 flex flex-col h-screen relative w-full min-w-0 overflow-hidden">
         {/* TopBar */}
         <header className="sticky top-0 z-40 border-b border-border bg-card/60 backdrop-blur-xl flex justify-between items-center h-14 px-2 sm:px-4 md:px-8 w-full">
           <div className="flex items-center gap-1 sm:gap-4">
@@ -218,7 +218,7 @@ export default function App() {
         </header>
 
         {/* Canvas */}
-        <main className="flex-1 p-4 md:p-6 flex flex-col gap-6 overflow-y-auto pb-6">
+        <main className="flex-1 p-4 md:p-6 flex flex-col gap-6 overflow-y-auto overflow-x-hidden pb-6 w-full min-w-0">
           {/* Editor — only when Query Editor is selected */}
           {activeNav === 'editor' && (
             <div id="editor-section" className="bg-[#0D1117] rounded-xl border border-border shadow-lg overflow-hidden flex flex-col">
