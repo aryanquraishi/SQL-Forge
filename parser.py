@@ -484,9 +484,25 @@ def parse_query(query):
             desc = first_err.get('description', 'Syntax error')
             line = first_err.get('line', 1)
             col = first_err.get('col', 0)
+            highlight = first_err.get('highlight', '')
+
+            # Make sqlglot descriptions more user-friendly
+            if "Required keyword" in desc:
+                desc = "Incomplete expression (missing value or condition)"
+            elif "Expected table name" in desc:
+                desc = "Missing or invalid table name"
+            elif "Expecting )" in desc:
+                desc = "Missing closing parenthesis ')'"
+            elif "Expecting (" in desc:
+                desc = "Missing opening parenthesis '('"
+            elif "Unexpected token" in desc or "Invalid expression" in desc:
+                desc = f"Unexpected token '{highlight}'" if highlight else "Unexpected token"
+
+            hint_text = f"Check the query near '{highlight}'. Look for spelling mistakes (e.g. FRM instead of FROM), missing commas, or missing values." if highlight else "Check the exact position mentioned above."
+
             parse_errors.add_syntax_error(
-                message=f"Syntax Error: {desc} at Line {line}, Column {col}",
-                hint="Check the exact position mentioned above. Look for missing quotes, missing commas, or wrong keywords."
+                message=f"Syntax Error: {desc} (near Line {line}, Col {col})",
+                hint=hint_text
             )
         else:
             err_msg = str(e)

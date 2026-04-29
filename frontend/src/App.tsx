@@ -317,7 +317,7 @@ export default function App() {
                 {result.grammar_trace?.length > 0 && (
                   <Details title="CFG Rules Trace" icon={Gauge} sectionKey="cfg" openSection={openSection} setOpenSection={setOpenSection}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-hidden">
-                      <div className="bg-muted/50 rounded p-2 overflow-auto max-h-[250px]">
+                      <div className="bg-muted/50 rounded p-2 custom-scrollbar overflow-y-auto max-h-[250px]">
                         <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Non-Terminal</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Production</th></tr></thead>
                           <tbody>{result.grammar_rules?.map((r: string, i: number) => {
@@ -326,7 +326,7 @@ export default function App() {
                           })}</tbody>
                         </table>
                       </div>
-                      <div className="bg-muted/50 rounded p-2 overflow-auto max-h-[250px]">
+                      <div className="bg-muted/50 rounded p-2 custom-scrollbar overflow-y-auto max-h-[250px]">
                         <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40 w-8">#</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Derivation Step</th></tr></thead>
                           <tbody>{result.grammar_trace?.map((t: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 text-primary font-bold border border-border/40">{i + 1}</td><td className="px-2 py-1 border border-border/40">{t.production}</td></tr>)}</tbody>
@@ -338,13 +338,13 @@ export default function App() {
                 {result.first_sets?.length > 0 && (
                   <Details title="First & Follow Sets" icon={ArrowRightLeft} sectionKey="firstfollow" openSection={openSection} setOpenSection={setOpenSection}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
+                      <div className="bg-muted/30 rounded p-2 custom-scrollbar overflow-y-auto max-h-[250px]">
                         <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Non-Terminal</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">FIRST Set</th></tr></thead>
                           <tbody>{result.first_sets.map((item: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 text-primary font-semibold border border-border/40">{item.non_terminal}</td><td className="px-2 py-1 border border-border/40">{item.first_set}</td></tr>)}</tbody>
                         </table>
                       </div>
-                      <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
+                      <div className="bg-muted/30 rounded p-2 custom-scrollbar overflow-y-auto max-h-[250px]">
                         <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Non-Terminal</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">FOLLOW Set</th></tr></thead>
                           <tbody>{result.follow_sets?.map((item: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 text-primary font-semibold border border-border/40">{item.non_terminal}</td><td className="px-2 py-1 border border-border/40">{item.follow_set}</td></tr>)}</tbody>
@@ -355,7 +355,7 @@ export default function App() {
                 )}
                 {result.parsing_table?.length > 0 && (
                   <Details title="LALR Parsing Table" icon={Grid3X3} sectionKey="lalr" openSection={openSection} setOpenSection={setOpenSection}>
-                    <div className="overflow-x-auto w-full pb-1">
+                    <div className="custom-scrollbar pb-1">
                       <table className="w-full font-mono text-[10px] sm:text-xs border-collapse border border-border/40 min-w-max">
                         <thead className="bg-muted/30"><tr>{Object.keys(result.parsing_table[0]).map(k => <th key={k} className="text-left px-3 py-2 text-muted-foreground border border-border/40 font-bold uppercase text-[10px] tracking-wider">{k}</th>)}</tr></thead>
                         <tbody>{result.parsing_table.map((row: any, i: number) => <tr key={i} className="hover:bg-muted/10">{Object.entries(row).map(([k, v], j) => {
@@ -379,20 +379,20 @@ export default function App() {
                 )}
                 {result.tac_string && (
                   <Details title="Three Address Code" icon={FileText} sectionKey="tac" openSection={openSection} setOpenSection={setOpenSection}>
-                    <pre className="bg-muted/50 rounded p-3 font-mono text-xs whitespace-pre overflow-x-auto w-full pb-2">{result.tac_string}</pre>
+                    <pre className="bg-muted/50 rounded p-3 font-mono text-xs whitespace-pre custom-scrollbar pb-2">{result.tac_string}</pre>
                   </Details>
                 )}
                 {result.quadruples?.length > 0 && (
                   <Details title="Quadruples & Triples" icon={Grid3X3} sectionKey="quads" openSection={openSection} setOpenSection={setOpenSection}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
+                      <div className="bg-muted/30 rounded p-2 custom-scrollbar overflow-y-auto max-h-[250px]">
                         <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">#</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Op</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg1</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg2</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Result</th></tr></thead>
                           <tbody>{result.quadruples.map((q: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 border border-border/40">{q.index}</td><td className="px-2 py-1 text-primary border border-border/40">{q.operator}</td><td className="px-2 py-1 border border-border/40">{q.arg1}</td><td className="px-2 py-1 border border-border/40">{q.arg2}</td><td className="px-2 py-1 font-semibold border border-border/40">{q.result}</td></tr>)}</tbody>
                         </table>
                       </div>
                       {result.triples?.length > 0 && (
-                        <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
+                        <div className="bg-muted/30 rounded p-2 custom-scrollbar overflow-y-auto max-h-[250px]">
                           <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                             <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">#</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Op</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg1</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg2</th></tr></thead>
                             <tbody>{result.triples.map((t: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 border border-border/40">{t.index}</td><td className="px-2 py-1 text-primary border border-border/40">{t.operator}</td><td className="px-2 py-1 border border-border/40">{t.arg1}</td><td className="px-2 py-1 border border-border/40">{t.arg2}</td></tr>)}</tbody>
@@ -538,7 +538,7 @@ function BentoCard({ title, icon: Icon, badge, id, children }: { title: string; 
         </div>
         {badge && <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-full border border-primary/30">{badge}</span>}
       </div>
-      <div className="flex-1 bg-muted/30 rounded p-2 overflow-x-auto overflow-y-auto">{children}</div>
+      <div className="flex-1 bg-muted/30 rounded p-2 custom-scrollbar overflow-y-auto">{children}</div>
     </div>
   )
 }

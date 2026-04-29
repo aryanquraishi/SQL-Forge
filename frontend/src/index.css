@@ -103,6 +103,28 @@ pre,
   background: rgba(120, 113, 108, .5);
 }
 
+.custom-scrollbar {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  display: block;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(120, 113, 108, 0.1);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(120, 113, 108, 0.5);
+  border-radius: 4px;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(120, 113, 108, .3) transparent;
