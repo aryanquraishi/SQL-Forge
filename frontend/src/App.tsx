@@ -195,22 +195,24 @@ export default function App() {
       {/* Main */}
       <div className="flex-1 flex flex-col h-screen relative">
         {/* TopBar */}
-        <header className="sticky top-0 z-40 border-b border-border bg-card/60 backdrop-blur-xl flex justify-between items-center h-14 px-4 md:px-8">
-          <div className="flex items-center gap-4">
-            <button className="md:hidden p-2 text-muted-foreground" onClick={() => setSideOpen(!sideOpen)}>
+        <header className="sticky top-0 z-40 border-b border-border bg-card/60 backdrop-blur-xl flex justify-between items-center h-14 px-2 sm:px-4 md:px-8 w-full">
+          <div className="flex items-center gap-1 sm:gap-4">
+            <button className="md:hidden p-1 sm:p-2 text-muted-foreground shrink-0" onClick={() => setSideOpen(!sideOpen)}>
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2">
-              <SQLForgeLogo size={28} />
-              <span className="font-mono font-bold text-lg text-primary">SQL</span>
-              <span className="font-[Literata] font-light text-lg">Forge</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="hidden min-[380px]:block"><SQLForgeLogo size={24} /></div>
+              <div className="flex items-center leading-none">
+                <span className="font-mono font-bold text-sm sm:text-lg text-primary">SQL</span>
+                <span className="font-[Literata] font-light text-sm sm:text-lg">Forge</span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeSwitch />
-            <button onClick={handleFormat} className="px-2.5 py-1.5 text-primary border border-primary/30 rounded-lg hover:bg-primary/10 text-xs sm:text-sm transition-colors">Format</button>
-            <GradientButton onClick={handleCompile} width="90px" height="34px">
-              <Play className="w-4 h-4" /> Run
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <div className="scale-75 sm:scale-100 origin-right"><ThemeSwitch /></div>
+            <button onClick={handleFormat} className="hidden min-[350px]:block px-2 py-1 text-primary border border-primary/30 rounded-lg hover:bg-primary/10 text-[10px] sm:text-sm transition-colors whitespace-nowrap">Format</button>
+            <GradientButton onClick={handleCompile} width="70px" height="32px">
+              <Play className="w-3 h-3" /> <span className="text-xs">Run</span>
             </GradientButton>
           </div>
         </header>
