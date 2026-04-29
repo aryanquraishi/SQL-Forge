@@ -17,7 +17,7 @@ import {
 import { LimelightNav } from '@/components/ui/limelight-nav'
 
 export default function App() {
-  const [query, setQuery] = useState('SELECT name, age FROM students WHERE age > 18')
+  const [query, setQuery] = useState('')
   const [result, setResult] = useState<CompileResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [sideOpen, setSideOpen] = useState(false)

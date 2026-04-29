@@ -479,13 +479,22 @@ def parse_query(query):
         return result, list(grammar_trace), parse_errors
 
     except sqlglot.errors.ParseError as e:
-        err_msg = str(e)
-        # Extract the first sentence for cleaner display
-        clean_msg = err_msg.split('. ')[0] if '. ' in err_msg else err_msg
-        parse_errors.add_syntax_error(
-            message=f"SQL Syntax Error: {clean_msg}",
-            hint="Check your SQL syntax. Common issues: missing commas, unmatched parentheses, misspelled keywords."
-        )
+        if hasattr(e, 'errors') and e.errors:
+            first_err = e.errors[0]
+            desc = first_err.get('description', 'Syntax error')
+            line = first_err.get('line', 1)
+            col = first_err.get('col', 0)
+            parse_errors.add_syntax_error(
+                message=f"Syntax Error: {desc} at Line {line}, Column {col}",
+                hint="Check the exact position mentioned above. Look for missing quotes, missing commas, or wrong keywords."
+            )
+        else:
+            err_msg = str(e)
+            clean_msg = err_msg.split('. ')[0] if '. ' in err_msg else err_msg
+            parse_errors.add_syntax_error(
+                message=f"SQL Syntax Error: {clean_msg}",
+                hint="Check your SQL syntax. Common issues: missing commas, unmatched parentheses, misspelled keywords."
+            )
         return None, list(grammar_trace), parse_errors
 
     except Exception as e:
