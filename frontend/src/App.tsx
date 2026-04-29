@@ -355,7 +355,7 @@ export default function App() {
                 )}
                 {result.parsing_table?.length > 0 && (
                   <Details title="LALR Parsing Table" icon={Grid3X3} sectionKey="lalr" openSection={openSection} setOpenSection={setOpenSection}>
-                    <div className="overflow-x-auto -mx-3 px-3">
+                    <div className="overflow-x-auto w-full pb-1">
                       <table className="w-full font-mono text-[10px] sm:text-xs border-collapse border border-border/40 min-w-max">
                         <thead className="bg-muted/30"><tr>{Object.keys(result.parsing_table[0]).map(k => <th key={k} className="text-left px-3 py-2 text-muted-foreground border border-border/40 font-bold uppercase text-[10px] tracking-wider">{k}</th>)}</tr></thead>
                         <tbody>{result.parsing_table.map((row: any, i: number) => <tr key={i} className="hover:bg-muted/10">{Object.entries(row).map(([k, v], j) => {
@@ -379,7 +379,7 @@ export default function App() {
                 )}
                 {result.tac_string && (
                   <Details title="Three Address Code" icon={FileText} sectionKey="tac" openSection={openSection} setOpenSection={setOpenSection}>
-                    <pre className="bg-muted/50 rounded p-3 font-mono text-xs whitespace-pre overflow-auto">{result.tac_string}</pre>
+                    <pre className="bg-muted/50 rounded p-3 font-mono text-xs whitespace-pre overflow-x-auto w-full pb-2">{result.tac_string}</pre>
                   </Details>
                 )}
                 {result.quadruples?.length > 0 && (
@@ -552,7 +552,7 @@ function Details({ title, icon: Icon, sectionKey, openSection, setOpenSection, c
         <span className="font-[Literata] text-sm font-bold text-foreground text-left">{title}</span>
         <ChevronDown className={`w-4 h-4 ml-auto text-muted-foreground transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="px-3 pb-3 animate-[fadeIn_0.2s_ease-out] w-full overflow-x-auto">{children}</div>}
+      {isOpen && <div className="px-3 pb-3 animate-[fadeIn_0.2s_ease-out] w-full min-w-0">{children}</div>}
     </div>
   )
 }
