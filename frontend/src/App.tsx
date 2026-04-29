@@ -316,7 +316,7 @@ export default function App() {
                   <Details title="CFG Rules Trace" icon={Gauge} sectionKey="cfg" openSection={openSection} setOpenSection={setOpenSection}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-hidden">
                       <div className="bg-muted/50 rounded p-2 overflow-auto max-h-[250px]">
-                        <table className="w-full font-mono text-[10px] sm:text-xs border-collapse border border-border/40 table-fixed">
+                        <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Non-Terminal</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Production</th></tr></thead>
                           <tbody>{result.grammar_rules?.map((r: string, i: number) => {
                             const parts = r.split('→')
@@ -325,7 +325,7 @@ export default function App() {
                         </table>
                       </div>
                       <div className="bg-muted/50 rounded p-2 overflow-auto max-h-[250px]">
-                        <table className="w-full font-mono text-xs border-collapse border border-border/40">
+                        <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40 w-8">#</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Derivation Step</th></tr></thead>
                           <tbody>{result.grammar_trace?.map((t: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 text-primary font-bold border border-border/40">{i + 1}</td><td className="px-2 py-1 border border-border/40">{t.production}</td></tr>)}</tbody>
                         </table>
@@ -337,13 +337,13 @@ export default function App() {
                   <Details title="First & Follow Sets" icon={ArrowRightLeft} sectionKey="firstfollow" openSection={openSection} setOpenSection={setOpenSection}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
-                        <table className="w-full font-mono text-xs border-collapse border border-border/40">
+                        <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Non-Terminal</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">FIRST Set</th></tr></thead>
                           <tbody>{result.first_sets.map((item: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 text-primary font-semibold border border-border/40">{item.non_terminal}</td><td className="px-2 py-1 border border-border/40">{item.first_set}</td></tr>)}</tbody>
                         </table>
                       </div>
                       <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
-                        <table className="w-full font-mono text-xs border-collapse border border-border/40">
+                        <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Non-Terminal</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">FOLLOW Set</th></tr></thead>
                           <tbody>{result.follow_sets?.map((item: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 text-primary font-semibold border border-border/40">{item.non_terminal}</td><td className="px-2 py-1 border border-border/40">{item.follow_set}</td></tr>)}</tbody>
                         </table>
@@ -354,7 +354,7 @@ export default function App() {
                 {result.parsing_table?.length > 0 && (
                   <Details title="LALR Parsing Table" icon={Grid3X3} sectionKey="lalr" openSection={openSection} setOpenSection={setOpenSection}>
                     <div className="overflow-x-auto -mx-3 px-3">
-                      <table className="w-full font-mono text-[10px] sm:text-xs border-collapse border border-border/40 min-w-[400px]">
+                      <table className="w-full font-mono text-[10px] sm:text-xs border-collapse border border-border/40 min-w-max">
                         <thead className="bg-muted/30"><tr>{Object.keys(result.parsing_table[0]).map(k => <th key={k} className="text-left px-3 py-2 text-muted-foreground border border-border/40 font-bold uppercase text-[10px] tracking-wider">{k}</th>)}</tr></thead>
                         <tbody>{result.parsing_table.map((row: any, i: number) => <tr key={i} className="hover:bg-muted/10">{Object.entries(row).map(([k, v], j) => {
                           const val = String(v || '')
@@ -384,14 +384,14 @@ export default function App() {
                   <Details title="Quadruples & Triples" icon={Grid3X3} sectionKey="quads" openSection={openSection} setOpenSection={setOpenSection}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
-                        <table className="w-full font-mono text-xs border-collapse border border-border/40">
+                        <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">#</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Op</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg1</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg2</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Result</th></tr></thead>
                           <tbody>{result.quadruples.map((q: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 border border-border/40">{q.index}</td><td className="px-2 py-1 text-primary border border-border/40">{q.operator}</td><td className="px-2 py-1 border border-border/40">{q.arg1}</td><td className="px-2 py-1 border border-border/40">{q.arg2}</td><td className="px-2 py-1 font-semibold border border-border/40">{q.result}</td></tr>)}</tbody>
                         </table>
                       </div>
                       {result.triples?.length > 0 && (
                         <div className="bg-muted/30 rounded p-2 overflow-auto max-h-[250px]">
-                          <table className="w-full font-mono text-xs border-collapse border border-border/40">
+                          <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-max">
                             <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">#</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Op</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg1</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Arg2</th></tr></thead>
                             <tbody>{result.triples.map((t: any, i: number) => <tr key={i} className="hover:bg-muted/20"><td className="px-2 py-1 border border-border/40">{t.index}</td><td className="px-2 py-1 text-primary border border-border/40">{t.operator}</td><td className="px-2 py-1 border border-border/40">{t.arg1}</td><td className="px-2 py-1 border border-border/40">{t.arg2}</td></tr>)}</tbody>
                           </table>
@@ -423,7 +423,7 @@ export default function App() {
         </button>
       )}
       {aiOpen && (
-        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-50 md:w-[340px] md:h-[480px] bg-white dark:bg-[#0a0a0a] md:bg-card md:dark:bg-card md:rounded-2xl border-0 md:border border-border shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed bottom-24 right-4 w-[calc(100vw-32px)] h-[65vh] md:inset-auto md:bottom-6 md:right-6 z-50 md:w-[340px] md:h-[480px] bg-white dark:bg-[#0a0a0a] md:bg-card md:dark:bg-card rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden">
           {/* Fun Confetti Background */}
           <div className="absolute inset-0 pointer-events-none opacity-50"><ConfettiBackground /></div>
 
