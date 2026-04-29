@@ -530,7 +530,7 @@ export default function App() {
 /* Helper Components */
 function BentoCard({ title, icon: Icon, badge, id, children }: { title: string; icon: any; badge?: string; id?: string; children: React.ReactNode }) {
   return (
-    <div id={id} className="bg-card/50 backdrop-blur-xl border border-border rounded-xl p-4 flex flex-col hover:border-primary/50 transition-colors shadow-lg">
+    <div id={id} className="bg-card/50 backdrop-blur-xl border border-border rounded-xl p-4 flex flex-col hover:border-primary/50 transition-colors shadow-lg overflow-hidden">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-foreground">
           <Icon className="w-4 h-4 text-primary" />
@@ -538,7 +538,7 @@ function BentoCard({ title, icon: Icon, badge, id, children }: { title: string; 
         </div>
         {badge && <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-full border border-primary/30">{badge}</span>}
       </div>
-      <div className="flex-1 bg-muted/30 rounded p-2 overflow-auto">{children}</div>
+      <div className="flex-1 bg-muted/30 rounded p-2 overflow-x-auto overflow-y-auto">{children}</div>
     </div>
   )
 }
@@ -546,13 +546,13 @@ function BentoCard({ title, icon: Icon, badge, id, children }: { title: string; 
 function Details({ title, icon: Icon, sectionKey, openSection, setOpenSection, children }: { title: string; icon: any; sectionKey: string; openSection: string | null; setOpenSection: (k: string | null) => void; children: React.ReactNode }) {
   const isOpen = openSection === sectionKey
   return (
-    <div className="bg-card/50 backdrop-blur-xl border border-border rounded-xl hover:border-primary/50 transition-colors">
+    <div className="bg-card/50 backdrop-blur-xl border border-border rounded-xl hover:border-primary/50 transition-colors overflow-hidden">
       <button onClick={() => setOpenSection(isOpen ? null : sectionKey)} className="w-full p-3 flex items-center gap-2 cursor-pointer">
-        <Icon className="w-4 h-4 text-primary" />
-        <span className="font-[Literata] text-sm font-bold text-foreground">{title}</span>
-        <ChevronDown className={`w-4 h-4 ml-auto text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <Icon className="w-4 h-4 text-primary shrink-0" />
+        <span className="font-[Literata] text-sm font-bold text-foreground text-left">{title}</span>
+        <ChevronDown className={`w-4 h-4 ml-auto text-muted-foreground transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      {isOpen && <div className="px-3 pb-3 animate-[fadeIn_0.2s_ease-out]">{children}</div>}
+      {isOpen && <div className="px-3 pb-3 animate-[fadeIn_0.2s_ease-out] w-full overflow-x-auto">{children}</div>}
     </div>
   )
 }
