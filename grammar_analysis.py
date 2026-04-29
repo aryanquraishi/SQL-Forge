@@ -15,40 +15,98 @@ Syllabus Mapping:
 #  Grammar Definition for FIRST/FOLLOW Computation
 # ============================================================
 
-# Non-terminals and their productions
+# Non-terminals and their productions (matches advanced parser.py)
 GRAMMAR = {
     'query': [
         ['select_stmt'],
         ['insert_stmt'],
     ],
     'select_stmt': [
-        ['SELECT', 'columns', 'FROM', 'table_name'],
-        ['SELECT', 'columns', 'FROM', 'table_name', 'WHERE', 'condition'],
+        ['SELECT', 'columns', 'FROM', 'table_refs'],
+        ['SELECT', 'columns', 'FROM', 'table_refs', 'WHERE', 'condition'],
+        ['SELECT', 'columns', 'FROM', 'table_refs', 'WHERE', 'condition', 'ORDER', 'BY', 'order_list'],
+        ['SELECT', 'columns', 'FROM', 'table_refs', 'ORDER', 'BY', 'order_list'],
+        ['SELECT', 'columns', 'FROM', 'table_refs', 'WHERE', 'condition', 'GROUP', 'BY', 'group_list'],
+        ['SELECT', 'columns', 'FROM', 'table_refs', 'GROUP', 'BY', 'group_list', 'HAVING', 'condition'],
+        ['SELECT', 'DISTINCT', 'columns', 'FROM', 'table_refs'],
     ],
     'columns': [
         ['STAR'],
         ['column_list'],
     ],
     'column_list': [
-        ['IDENTIFIER'],
-        ['IDENTIFIER', 'COMMA', 'column_list'],
+        ['column_expr'],
+        ['column_expr', 'COMMA', 'column_list'],
     ],
-    'table_name': [
+    'column_expr': [
         ['IDENTIFIER'],
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER'],
+        ['IDENTIFIER', 'AS', 'IDENTIFIER'],
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER', 'AS', 'IDENTIFIER'],
+        ['IDENTIFIER', 'LPAREN', 'IDENTIFIER', 'RPAREN'],
+        ['IDENTIFIER', 'LPAREN', 'IDENTIFIER', 'DOT', 'IDENTIFIER', 'RPAREN'],
+        ['IDENTIFIER', 'LPAREN', 'STAR', 'RPAREN'],
+        ['IDENTIFIER', 'LPAREN', 'IDENTIFIER', 'RPAREN', 'AS', 'IDENTIFIER'],
+        ['IDENTIFIER', 'LPAREN', 'IDENTIFIER', 'DOT', 'IDENTIFIER', 'RPAREN', 'AS', 'IDENTIFIER'],
+    ],
+    'table_refs': [
+        ['table_ref'],
+        ['table_ref', 'join_clauses'],
+    ],
+    'table_ref': [
+        ['IDENTIFIER'],
+        ['IDENTIFIER', 'IDENTIFIER'],
+        ['IDENTIFIER', 'AS', 'IDENTIFIER'],
+    ],
+    'join_clauses': [
+        ['join_clause'],
+        ['join_clause', 'join_clauses'],
+    ],
+    'join_clause': [
+        ['JOIN', 'table_ref', 'ON', 'join_condition'],
+    ],
+    'join_condition': [
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER', 'EQ', 'IDENTIFIER', 'DOT', 'IDENTIFIER'],
+        ['IDENTIFIER', 'EQ', 'IDENTIFIER'],
     ],
     'condition': [
         ['expression'],
-        ['expression', 'AND', 'condition'],
-        ['expression', 'OR', 'condition'],
+        ['condition', 'AND', 'condition'],
+        ['condition', 'OR', 'condition'],
+        ['LPAREN', 'condition', 'RPAREN'],
     ],
     'expression': [
-        ['IDENTIFIER', 'operator', 'value'],
+        ['value', 'operator', 'value'],
     ],
     'operator': [
         ['GT'], ['LT'], ['EQ'], ['GTE'], ['LTE'], ['NEQ'],
     ],
     'value': [
         ['NUMBER'], ['STRING'], ['IDENTIFIER'],
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER'],
+        ['IDENTIFIER', 'LPAREN', 'IDENTIFIER', 'RPAREN'],
+        ['IDENTIFIER', 'LPAREN', 'IDENTIFIER', 'DOT', 'IDENTIFIER', 'RPAREN'],
+        ['IDENTIFIER', 'LPAREN', 'STAR', 'RPAREN'],
+    ],
+    'order_list': [
+        ['order_item'],
+        ['order_item', 'COMMA', 'order_list'],
+    ],
+    'order_item': [
+        ['IDENTIFIER'],
+        ['IDENTIFIER', 'ASC'],
+        ['IDENTIFIER', 'DESC'],
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER'],
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER', 'ASC'],
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER', 'DESC'],
+    ],
+    'group_list': [
+        ['group_item'],
+        ['group_item', 'COMMA', 'group_list'],
+    ],
+    'group_item': [
+        ['IDENTIFIER'],
+        ['IDENTIFIER', 'DOT', 'IDENTIFIER'],
     ],
     'insert_stmt': [
         ['INSERT', 'INTO', 'IDENTIFIER', 'VALUES', 'LPAREN', 'value_list', 'RPAREN'],
@@ -63,6 +121,8 @@ GRAMMAR = {
 TERMINALS = {
     'SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES',
     'AND', 'OR', 'NOT',
+    'JOIN', 'ON', 'ORDER', 'BY', 'ASC', 'DESC',
+    'GROUP', 'HAVING', 'AS', 'DISTINCT',
     'IDENTIFIER', 'NUMBER', 'STRING',
     'COMMA', 'SEMICOLON', 'LPAREN', 'RPAREN',
     'STAR', 'DOT',
@@ -81,10 +141,10 @@ NON_TERMINALS = set(GRAMMAR.keys())
 def compute_first_sets():
     """
     Compute FIRST sets for all non-terminals in the grammar.
-    
+
     FIRST(A) = Set of terminals that can appear as the first symbol
                in any string derived from A.
-    
+
     Algorithm:
     1. If X is a terminal, FIRST(X) = {X}
     2. If X → ε, add ε to FIRST(X)
@@ -92,16 +152,16 @@ def compute_first_sets():
        - Add FIRST(Y1) - {ε} to FIRST(X)
        - If ε ∈ FIRST(Y1), add FIRST(Y2) - {ε} to FIRST(X)
        - Continue until no ε, or add ε if all Yi can derive ε
-    
+
     Returns:
         dict: Non-terminal → set of first terminals
     """
     first = {nt: set() for nt in NON_TERMINALS}
-    
+
     changed = True
     while changed:
         changed = False
-        
+
         for nt, productions in GRAMMAR.items():
             for production in productions:
                 # Process each symbol in the production
@@ -118,13 +178,13 @@ def compute_first_sets():
                         first[nt] |= first[symbol] - {'ε'}
                         if len(first[nt]) > before:
                             changed = True
-                        
+
                         # If this non-terminal can't derive ε, stop
                         if 'ε' not in first[symbol]:
                             break
                     else:
                         break
-    
+
     return first
 
 
@@ -135,50 +195,38 @@ def compute_first_sets():
 def compute_follow_sets(first_sets=None):
     """
     Compute FOLLOW sets for all non-terminals in the grammar.
-    
-    FOLLOW(A) = Set of terminals that can appear immediately to the
-                right of A in some sentential form.
-    
-    Algorithm:
-    1. Add $ to FOLLOW(start_symbol)
-    2. For each production A → αBβ:
-       - Add FIRST(β) - {ε} to FOLLOW(B)
-       - If ε ∈ FIRST(β) or β is empty, add FOLLOW(A) to FOLLOW(B)
-    
-    Returns:
-        dict: Non-terminal → set of follow terminals
     """
     if first_sets is None:
         first_sets = compute_first_sets()
-    
+
     follow = {nt: set() for nt in NON_TERMINALS}
-    
+
     # Rule 1: Add $ to FOLLOW of start symbol
     follow['query'].add('$')
-    
+
     changed = True
     while changed:
         changed = False
-        
+
         for nt, productions in GRAMMAR.items():
             for production in productions:
                 for i, symbol in enumerate(production):
                     if symbol not in NON_TERMINALS:
                         continue
-                    
+
                     # Get β (everything after this symbol)
                     beta = production[i + 1:]
-                    
+
                     if beta:
                         # Compute FIRST(β)
                         first_beta = _first_of_sequence(beta, first_sets)
-                        
+
                         # Add FIRST(β) - {ε} to FOLLOW(symbol)
                         before = len(follow[symbol])
                         follow[symbol] |= first_beta - {'ε'}
                         if len(follow[symbol]) > before:
                             changed = True
-                        
+
                         # If ε ∈ FIRST(β), add FOLLOW(A) to FOLLOW(symbol)
                         if 'ε' in first_beta:
                             before = len(follow[symbol])
@@ -191,60 +239,69 @@ def compute_follow_sets(first_sets=None):
                         follow[symbol] |= follow[nt]
                         if len(follow[symbol]) > before:
                             changed = True
-    
+
     return follow
 
 
 def _first_of_sequence(sequence, first_sets):
     """Compute FIRST set for a sequence of symbols."""
     result = set()
-    
+
     for symbol in sequence:
         if symbol in TERMINALS:
             result.add(symbol)
-            return result  # Terminal found, stop
+            return result
         elif symbol in NON_TERMINALS:
             result |= first_sets[symbol] - {'ε'}
             if 'ε' not in first_sets[symbol]:
-                return result  # No ε possible, stop
-    
-    # If we get here, all symbols can derive ε
+                return result
+
     result.add('ε')
     return result
 
 
 # ============================================================
-#  Parsing Table Generation (Simplified)
+#  Parsing Table Generation (Simplified — for UI demonstration)
 # ============================================================
 
 def generate_parsing_table():
     """
     Generate a simplified LALR(1)-style parsing table.
-    This shows key states and their actions for demonstration.
-    
-    Returns:
-        list: List of dicts representing table rows
+    Expanded to cover advanced SQL constructs.
     """
-    # Simplified parsing table for demonstration
-    # In reality, PLY generates this internally via LALR(1) algorithm
     table = [
         {'state': 0, 'SELECT': 'Shift → S1', 'INSERT': 'Shift → S2', 'action': 'Start state'},
-        {'state': 1, 'IDENTIFIER': 'Shift → S3', 'STAR': 'Shift → S4', 'action': 'After SELECT'},
+        {'state': 1, 'IDENTIFIER': 'Shift → S3', 'STAR': 'Shift → S4', 'DISTINCT': 'Shift → S1a', 'action': 'After SELECT'},
         {'state': 2, 'INTO': 'Shift → S5', 'action': 'After INSERT'},
-        {'state': 3, 'COMMA': 'Shift → S6', 'FROM': 'Reduce columns', 'action': 'After column name'},
+        {'state': 3, 'COMMA': 'Shift → S6', 'DOT': 'Shift → S3a', 'AS': 'Shift → S3b', 'LPAREN': 'Shift → S3c', 'FROM': 'Reduce columns', 'action': 'After column name'},
         {'state': 4, 'FROM': 'Reduce columns→*', 'action': 'After *'},
         {'state': 5, 'IDENTIFIER': 'Shift → S7', 'action': 'After INTO'},
         {'state': 6, 'IDENTIFIER': 'Shift → S3', 'action': 'After comma (more columns)'},
-        {'state': 7, 'VALUES': 'Shift → S8', 'action': 'After table name (INSERT)'},
+        {'state': 7, 'VALUES': 'Shift → S8', 'action': 'After table (INSERT)'},
         {'state': 8, 'LPAREN': 'Shift → S9', 'action': 'After VALUES'},
         {'state': 9, 'NUMBER': 'Shift → S10', 'STRING': 'Shift → S10', 'IDENTIFIER': 'Shift → S10', 'action': 'Inside ( )'},
         {'state': 10, 'COMMA': 'Shift → S11', 'RPAREN': 'Reduce value_list', 'action': 'After value'},
-        {'state': 11, 'IDENTIFIER': 'Shift → S12', 'action': 'After FROM'},
-        {'state': 12, 'WHERE': 'Shift → S13', '$': 'Reduce select_stmt', 'action': 'After table name'},
-        {'state': 13, 'IDENTIFIER': 'Shift → S14', 'action': 'After WHERE'},
-        {'state': 14, 'GT': 'Shift → S15', 'LT': 'Shift → S15', 'EQ': 'Shift → S15', 'GTE': 'Shift → S15', 'LTE': 'Shift → S15', 'NEQ': 'Shift → S15', 'action': 'Condition LHS'},
-        {'state': 15, 'NUMBER': 'Shift → S16', 'STRING': 'Shift → S16', 'IDENTIFIER': 'Shift → S16', 'action': 'After operator'},
-        {'state': 16, 'AND': 'Shift → S13', 'OR': 'Shift → S13', '$': 'Reduce select_stmt', 'action': 'After condition value'},
+        {'state': 11, 'IDENTIFIER': 'Shift → S12', 'action': 'After FROM — table ref'},
+        {'state': 12, 'IDENTIFIER': 'Shift → S12a', 'JOIN': 'Shift → S20', 'WHERE': 'Shift → S13', 'ORDER': 'Shift → S30', 'GROUP': 'Shift → S40', '$': 'Reduce select_stmt', 'action': 'After table name (alias?)'},
+        {'state': 13, 'IDENTIFIER': 'Shift → S14', 'action': 'After WHERE — condition LHS'},
+        {'state': 14, 'DOT': 'Shift → S14a', 'GT': 'Shift → S15', 'LT': 'Shift → S15', 'EQ': 'Shift → S15', 'GTE': 'Shift → S15', 'LTE': 'Shift → S15', 'NEQ': 'Shift → S15', 'action': 'Condition LHS value'},
+        {'state': 15, 'NUMBER': 'Shift → S16', 'STRING': 'Shift → S16', 'IDENTIFIER': 'Shift → S16', 'action': 'After operator — RHS'},
+        {'state': 16, 'AND': 'Shift → S13', 'OR': 'Shift → S13', 'ORDER': 'Shift → S30', 'GROUP': 'Shift → S40', '$': 'Reduce select_stmt', 'action': 'After condition value'},
+        {'state': 20, 'IDENTIFIER': 'Shift → S21', 'action': 'After JOIN — table ref'},
+        {'state': 21, 'IDENTIFIER': 'Shift → S21a', 'ON': 'Shift → S22', 'action': 'After JOIN table (alias?)'},
+        {'state': 22, 'IDENTIFIER': 'Shift → S23', 'action': 'After ON — join cond LHS'},
+        {'state': 23, 'DOT': 'Shift → S24', 'EQ': 'Shift → S25', 'action': 'Join cond LHS'},
+        {'state': 24, 'IDENTIFIER': 'Shift → S24a', 'action': 'After t.col in join cond'},
+        {'state': 25, 'IDENTIFIER': 'Shift → S26', 'action': 'Join cond RHS'},
+        {'state': 26, 'DOT': 'Shift → S27', 'JOIN': 'Shift → S20', 'WHERE': 'Shift → S13', 'ORDER': 'Shift → S30', '$': 'Reduce join', 'action': 'After join cond RHS'},
+        {'state': 30, 'BY': 'Shift → S31', 'action': 'After ORDER'},
+        {'state': 31, 'IDENTIFIER': 'Shift → S32', 'action': 'After ORDER BY — col'},
+        {'state': 32, 'DOT': 'Shift → S32a', 'ASC': 'Shift → S33', 'DESC': 'Shift → S33', 'COMMA': 'Shift → S31', '$': 'Reduce select_stmt', 'action': 'Order column'},
+        {'state': 33, 'COMMA': 'Shift → S31', '$': 'Reduce select_stmt', 'action': 'After ASC/DESC'},
+        {'state': 40, 'BY': 'Shift → S41', 'action': 'After GROUP'},
+        {'state': 41, 'IDENTIFIER': 'Shift → S42', 'action': 'After GROUP BY — col'},
+        {'state': 42, 'DOT': 'Shift → S42a', 'COMMA': 'Shift → S41', 'HAVING': 'Shift → S43', '$': 'Reduce select_stmt', 'action': 'Group column'},
+        {'state': 43, 'IDENTIFIER': 'Shift → S14', 'action': 'After HAVING — condition'},
     ]
     return table
 

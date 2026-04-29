@@ -133,14 +133,47 @@ def build_symbol_table_from_ast(ast_node, tokens=None):
         columns = ast_node.get('columns', [])
         if isinstance(columns, list):
             for col in columns:
-                if col != '*':
+                # Handle both old string format and new dict format
+                if isinstance(col, dict):
+                    col_name = col.get('expr', '')
+                    if col_name and col_name != '*':
+                        pos = _find_token_position(tokens, col_name.split('.')[-1]) if tokens else 0
+                        st.add_symbol(col_name, 'COLUMN', pos, 'SELECT')
+                        st.set_data_type(col_name, 'identifier')
+                        if col.get('alias'):
+                            st.add_symbol(col['alias'], 'ALIAS', pos, 'SELECT')
+                            st.set_data_type(col['alias'], 'identifier')
+                elif col != '*':
                     pos = _find_token_position(tokens, col) if tokens else 0
                     st.add_symbol(col, 'COLUMN', pos, 'SELECT')
                     st.set_data_type(col, 'identifier')
         
-        # Add table symbol
+        # Add table symbol (handles both string and dict)
         table = ast_node.get('table', '')
-        if table:
+        if isinstance(table, dict):
+            tbl_name = table.get('name', '')
+            tbl_alias = table.get('alias', '')
+            if tbl_name:
+                pos = _find_token_position(tokens, tbl_name) if tokens else 0
+                st.add_symbol(tbl_name, 'TABLE', pos, 'FROM')
+                st.set_data_type(tbl_name, 'identifier')
+            if tbl_alias:
+                st.add_symbol(tbl_alias, 'ALIAS', 0, 'FROM')
+                st.set_data_type(tbl_alias, 'identifier')
+            # Add JOIN table symbols
+            for join in table.get('joins', []):
+                jtbl = join.get('table', {})
+                if isinstance(jtbl, dict):
+                    jname = jtbl.get('name', '')
+                    jalias = jtbl.get('alias', '')
+                    if jname:
+                        pos = _find_token_position(tokens, jname) if tokens else 0
+                        st.add_symbol(jname, 'TABLE', pos, 'JOIN')
+                        st.set_data_type(jname, 'identifier')
+                    if jalias:
+                        st.add_symbol(jalias, 'ALIAS', 0, 'JOIN')
+                        st.set_data_type(jalias, 'identifier')
+        elif table:
             pos = _find_token_position(tokens, table) if tokens else 0
             st.add_symbol(table, 'TABLE', pos, 'FROM')
             st.set_data_type(table, 'identifier')
@@ -149,6 +182,28 @@ def build_symbol_table_from_ast(ast_node, tokens=None):
         condition = ast_node.get('condition', None)
         if condition:
             _extract_condition_symbols(st, condition, tokens)
+        
+        # Add GROUP BY symbols
+        group_by = ast_node.get('group_by', None)
+        if group_by:
+            for g in group_by:
+                gname = str(g).split('.')[-1]
+                pos = _find_token_position(tokens, gname) if tokens else 0
+                st.add_symbol(str(g), 'COLUMN', pos, 'GROUP BY')
+        
+        # Add ORDER BY symbols
+        order_by = ast_node.get('order_by', None)
+        if order_by:
+            for o in order_by:
+                oname = o.get('column', str(o)) if isinstance(o, dict) else str(o)
+                obase = oname.split('.')[-1]
+                pos = _find_token_position(tokens, obase) if tokens else 0
+                st.add_symbol(oname, 'COLUMN', pos, 'ORDER BY')
+        
+        # Add HAVING condition symbols
+        having = ast_node.get('having', None)
+        if having:
+            _extract_condition_symbols(st, having, tokens)
     
     elif query_type == 'INSERT':
         # Add table symbol

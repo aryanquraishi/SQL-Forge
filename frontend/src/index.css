@@ -47,7 +47,9 @@
   --ring: 25 76% 47%;
 }
 
-* { border-color: hsl(var(--border)); }
+* {
+  border-color: hsl(var(--border));
+}
 
 body {
   background-color: hsl(var(--background));
@@ -59,32 +61,68 @@ body {
 .dark body {
   background-image:
     radial-gradient(circle at 50% 0%, #111318, #0D1117),
-    linear-gradient(to right, rgba(255,255,255,.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,.02) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, .02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, .02) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
 }
 
 :root body {
   background-image:
-    linear-gradient(to right, rgba(180,170,158,.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(180,170,158,.1) 1px, transparent 1px);
+    linear-gradient(to right, rgba(180, 170, 158, .1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(180, 170, 158, .1) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
-h1, h2, h3 { font-family: 'Literata', serif; }
-code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
+h1,
+h2,
+h3 {
+  font-family: 'Literata', serif;
+}
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(120,113,108,.3); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(120,113,108,.5); }
-* { scrollbar-width: thin; scrollbar-color: rgba(120,113,108,.3) transparent; }
+code,
+pre,
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 113, 108, .3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 113, 108, .5);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 113, 108, .3) transparent;
+}
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-.fade-in { animation: fadeIn 0.4s ease-out; }
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
 
 /* Rotating Gradient Button */
 @property --r {
@@ -92,24 +130,43 @@ code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
   inherits: false;
   initial-value: 0deg;
 }
+
 .rotatingGradient {
   background: conic-gradient(from var(--r), #D4691E, #E8894A, #D4691E, #A84D12, #D4691E);
   animation: rotating 3s linear infinite;
 }
+
 @keyframes rotating {
-  to { --r: 360deg; }
+  to {
+    --r: 360deg;
+  }
 }
 
 /* Section highlight when navigated to */
 @keyframes sectionPulse {
-  0% { box-shadow: 0 0 0 0 hsl(25 76% 47% / 0.4); }
-  50% { box-shadow: 0 0 0 6px hsl(25 76% 47% / 0.15); }
-  100% { box-shadow: 0 0 0 0 hsl(25 76% 47% / 0); }
+  0% {
+    box-shadow: 0 0 0 0 hsl(25 76% 47% / 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px hsl(25 76% 47% / 0.15);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 hsl(25 76% 47% / 0);
+  }
 }
+
 .section-highlight {
   animation: sectionPulse 1.2s ease-out;
   outline: 2px solid hsl(25 76% 47% / 0.4);
   outline-offset: 4px;
   border-radius: 12px;
   transition: outline-color 1.5s ease-out;
+}
+
+/* Force desktop sidebar hidden on mobile */
+.desktop-sidebar { display: none !important; }
+@media (min-width: 768px) {
+  .desktop-sidebar { display: flex !important; }
 }

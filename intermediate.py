@@ -1,6 +1,8 @@
 """
 intermediate.py — Intermediate Code Generation for Mini SQL Compiler
-Generates Postfix Notation, Three Address Code (TAC), and Quadruples.
+Generates Postfix Notation, Three Address Code (TAC), Quadruples, and Triples.
+
+Supports ADVANCED AST: JOINs, aliases, dot notation, ORDER BY, GROUP BY, HAVING, DISTINCT, aggregates.
 
 Syllabus Mapping:
   - Unit 3: Postfix Notation
@@ -22,14 +24,13 @@ def generate_postfix(condition):
     
     Args:
         condition (dict): Condition AST from parser
-            e.g., {'type': 'COMPARISON', 'left': 'age', 'operator': '>', 'right': 18}
     
     Returns:
         str: Postfix notation string
     
     Example:
-        Input:  age > 18 AND department = 'CS'
-        Output: age 18 > department 'CS' = AND
+        Input:  s.age > 18 AND c.course_name = 'Compiler Design'
+        Output: s.age 18 > c.course_name 'Compiler Design' = AND
     """
     if condition is None:
         return ""
@@ -64,9 +65,6 @@ def _condition_to_postfix(condition, tokens):
 def get_postfix_steps(condition):
     """
     Get step-by-step postfix conversion for display.
-    
-    Returns:
-        list: List of step dicts showing the conversion process
     """
     if condition is None:
         return []
@@ -136,11 +134,7 @@ class TACGenerator:
     """
     Generates Three Address Code from the parsed AST.
     
-    Three Address Code format:
-        t1 = age > 18
-        t2 = SELECT name FROM students
-        t3 = t2 WHERE t1
-        result = t3
+    Supports advanced SELECT with JOIN, ORDER BY, GROUP BY, HAVING, DISTINCT.
     """
     
     def __init__(self):
@@ -181,11 +175,40 @@ class TACGenerator:
         
         return self.instructions
     
+    def _get_col_str(self, columns):
+        """Get column string from column list (handles dicts and strings)."""
+        parts = []
+        for col in columns:
+            if isinstance(col, dict):
+                expr = col.get('expr', str(col))
+                alias = col.get('alias')
+                if alias:
+                    parts.append(f"{expr} AS {alias}")
+                else:
+                    parts.append(str(expr))
+            else:
+                parts.append(str(col))
+        return ", ".join(parts)
+    
+    def _get_table_str(self, table):
+        """Get table string from table ref (handles dicts and strings)."""
+        if isinstance(table, dict):
+            name = table.get('name', '')
+            alias = table.get('alias', '')
+            if alias:
+                return f"{name} {alias}"
+            return name
+        return str(table)
+    
     def _generate_select(self, ast_node):
-        """Generate TAC for SELECT statement."""
+        """Generate TAC for SELECT statement (advanced)."""
         columns = ast_node.get('columns', [])
         table = ast_node.get('table', '')
         condition = ast_node.get('condition', None)
+        group_by = ast_node.get('group_by', None)
+        having = ast_node.get('having', None)
+        order_by = ast_node.get('order_by', None)
+        distinct = ast_node.get('distinct', False)
         
         # Generate condition TAC first (if exists)
         cond_temp = None
@@ -193,17 +216,44 @@ class TACGenerator:
             cond_temp = self._generate_condition(condition)
         
         # Column list
-        col_str = ", ".join(str(c) for c in columns)
+        col_str = self._get_col_str(columns)
+        table_str = self._get_table_str(table)
+        
+        # DISTINCT prefix
+        select_kw = "SELECT DISTINCT" if distinct else "SELECT"
         
         # SELECT instruction
         select_temp = self.new_temp()
         self.instructions.append({
             'result': select_temp,
-            'op': 'SELECT',
+            'op': select_kw,
             'arg1': col_str,
-            'arg2': table,
-            'code': f"{select_temp} = SELECT {col_str} FROM {table}"
+            'arg2': table_str,
+            'code': f"{select_temp} = {select_kw} {col_str} FROM {table_str}"
         })
+        
+        current_temp = select_temp
+        
+        # JOIN instructions
+        joins = []
+        if isinstance(table, dict):
+            joins = table.get('joins', [])
+        
+        for join in joins:
+            jtable_str = self._get_table_str(join.get('table', {}))
+            on_cond = join.get('on', {})
+            on_left = on_cond.get('left', '')
+            on_right = on_cond.get('right', '')
+            
+            join_temp = self.new_temp()
+            self.instructions.append({
+                'result': join_temp,
+                'op': 'JOIN',
+                'arg1': current_temp,
+                'arg2': jtable_str,
+                'code': f"{join_temp} = {current_temp} JOIN {jtable_str} ON {on_left} = {on_right}"
+            })
+            current_temp = join_temp
         
         # Apply WHERE filter if exists
         if cond_temp:
@@ -211,27 +261,65 @@ class TACGenerator:
             self.instructions.append({
                 'result': filter_temp,
                 'op': 'FILTER',
-                'arg1': select_temp,
+                'arg1': current_temp,
                 'arg2': cond_temp,
-                'code': f"{filter_temp} = {select_temp} WHERE {cond_temp}"
+                'code': f"{filter_temp} = {current_temp} WHERE {cond_temp}"
             })
-            # Final result
+            current_temp = filter_temp
+        
+        # GROUP BY
+        if group_by:
+            group_str = ", ".join(str(g) for g in group_by)
+            group_temp = self.new_temp()
             self.instructions.append({
-                'result': 'result',
-                'op': '=',
-                'arg1': filter_temp,
-                'arg2': '',
-                'code': f"result = {filter_temp}"
+                'result': group_temp,
+                'op': 'GROUP',
+                'arg1': current_temp,
+                'arg2': group_str,
+                'code': f"{group_temp} = {current_temp} GROUP BY {group_str}"
             })
-        else:
-            # No WHERE, result is the SELECT directly
+            current_temp = group_temp
+        
+        # HAVING
+        if having:
+            having_temp = self._generate_condition(having)
+            having_filter = self.new_temp()
             self.instructions.append({
-                'result': 'result',
-                'op': '=',
-                'arg1': select_temp,
-                'arg2': '',
-                'code': f"result = {select_temp}"
+                'result': having_filter,
+                'op': 'HAVING',
+                'arg1': current_temp,
+                'arg2': having_temp,
+                'code': f"{having_filter} = {current_temp} HAVING {having_temp}"
             })
+            current_temp = having_filter
+        
+        # ORDER BY
+        if order_by:
+            order_parts = []
+            for item in order_by:
+                if isinstance(item, dict):
+                    order_parts.append(f"{item.get('column', '')} {item.get('direction', 'ASC')}")
+                else:
+                    order_parts.append(str(item))
+            order_str = ", ".join(order_parts)
+            order_temp = self.new_temp()
+            self.instructions.append({
+                'result': order_temp,
+                'op': 'ORDER',
+                'arg1': current_temp,
+                'arg2': order_str,
+                'code': f"{order_temp} = {current_temp} ORDER BY {order_str}"
+            })
+            current_temp = order_temp
+        
+        # Final result
+        self.instructions.append({
+            'result': 'result',
+            'op': '=',
+            'arg1': current_temp,
+            'arg2': '',
+            'code': f"result = {current_temp}"
+        })
     
     def _generate_insert(self, ast_node):
         """Generate TAC for INSERT statement."""
@@ -320,14 +408,7 @@ class TACGenerator:
 def generate_quadruples(tac_instructions):
     """
     Convert TAC instructions to Quadruples format.
-    
     Format: (Operator, Arg1, Arg2, Result)
-    
-    Args:
-        tac_instructions (list): TAC instruction dicts from TACGenerator
-    
-    Returns:
-        list: List of quadruple dicts
     """
     quadruples = []
     
@@ -347,15 +428,8 @@ def generate_quadruples(tac_instructions):
 def generate_triples(tac_instructions):
     """
     Convert TAC instructions to Triples format.
-    
     Format: (Index, Operator, Arg1, Arg2)
     Unlike quadruples, triples use the index as the implicit result reference.
-    
-    Args:
-        tac_instructions (list): TAC instruction dicts from TACGenerator
-    
-    Returns:
-        list: List of triple dicts
     """
     triples = []
     
@@ -392,26 +466,50 @@ def generate_triples(tac_instructions):
 #  Module test
 # ============================================================
 if __name__ == '__main__':
-    # Test with a sample AST
+    # Test with an advanced AST
     sample_ast = {
         'type': 'SELECT',
-        'columns': ['name', 'age'],
-        'table': 'students',
+        'distinct': False,
+        'columns': [
+            {'expr': 's.name', 'alias': None},
+            {'expr': 'AVG(s.marks)', 'alias': 'avg_marks', 'is_agg': True},
+        ],
+        'table': {
+            'name': 'students',
+            'alias': 's',
+            'joins': [
+                {
+                    'type': 'JOIN',
+                    'table': {'name': 'courses', 'alias': 'c', 'joins': []},
+                    'on': {'type': 'JOIN_COND', 'left': 's.course_id', 'right': 'c.course_id'},
+                }
+            ],
+        },
         'condition': {
             'type': 'AND',
             'left': {
                 'type': 'COMPARISON',
-                'left': 'age',
+                'left': 's.age',
                 'operator': '>',
                 'right': 18
             },
             'right': {
                 'type': 'COMPARISON',
-                'left': 'dept',
+                'left': 'c.name',
                 'operator': '=',
                 'right': "'CS'"
             }
-        }
+        },
+        'group_by': ['c.name'],
+        'having': {
+            'type': 'COMPARISON',
+            'left': 'AVG(s.marks)',
+            'operator': '>',
+            'right': 60,
+        },
+        'order_by': [
+            {'column': 's.name', 'direction': 'ASC'},
+        ],
     }
     
     # Postfix
@@ -420,11 +518,6 @@ if __name__ == '__main__':
     print("=" * 60)
     postfix = generate_postfix(sample_ast['condition'])
     print(f"  {postfix}")
-    
-    print("\nPostfix Steps:")
-    for step in get_postfix_steps(sample_ast['condition']):
-        print(f"  Step {step['step']}: {step['description']}")
-        print(f"         {step['expression']}")
     
     # Three Address Code
     print("\n" + "=" * 60)
@@ -439,17 +532,17 @@ if __name__ == '__main__':
     print("QUADRUPLES")
     print("=" * 60)
     quads = generate_quadruples(tac)
-    print(f"  {'#':<4} {'Operator':<10} {'Arg1':<15} {'Arg2':<15} {'Result':<10}")
-    print("  " + "─" * 54)
+    print(f"  {'#':<4} {'Operator':<12} {'Arg1':<25} {'Arg2':<20} {'Result':<10}")
+    print("  " + "─" * 71)
     for q in quads:
-        print(f"  {q['index']:<4} {q['operator']:<10} {q['arg1']:<15} {q['arg2']:<15} {q['result']:<10}")
+        print(f"  {q['index']:<4} {q['operator']:<12} {str(q['arg1']):<25} {str(q['arg2']):<20} {q['result']:<10}")
     
     # Triples
     print("\n" + "=" * 60)
     print("TRIPLES")
     print("=" * 60)
     trips = generate_triples(tac)
-    print(f"  {'#':<4} {'Operator':<10} {'Arg1':<15} {'Arg2':<15}")
-    print("  " + "─" * 44)
+    print(f"  {'#':<4} {'Operator':<12} {'Arg1':<25} {'Arg2':<20}")
+    print("  " + "─" * 61)
     for t in trips:
-        print(f"  {t['index']:<4} {t['operator']:<10} {t['arg1']:<15} {t['arg2']:<15}")
+        print(f"  {t['index']:<4} {t['operator']:<12} {str(t['arg1']):<25} {str(t['arg2']):<20}")

@@ -2,6 +2,8 @@
 syntax_tree.py — Parse Tree Node Class and Tree Builder
 Builds visual parse tree from AST output of the parser.
 
+Supports ADVANCED AST: JOINs, aliases, dot notation, ORDER BY, GROUP BY, HAVING, DISTINCT, aggregates.
+
 Syllabus Mapping:
   - Unit 3: Construction of Syntax Trees
   - Unit 3: Synthesized and Inherited Attributes
@@ -65,28 +67,77 @@ def build_tree_from_ast(ast_node):
         return TreeNode("QUERY", value=str(ast_node))
 
 
+def _get_col_display(col):
+    """Get display string for a column (handles dict and string)."""
+    if isinstance(col, dict):
+        expr = col.get('expr', str(col))
+        alias = col.get('alias')
+        if alias:
+            return f"{expr} AS {alias}"
+        return str(expr)
+    return str(col)
+
+
 def _build_select_tree(ast_node):
-    """Build parse tree for SELECT statement."""
+    """Build parse tree for SELECT statement (advanced)."""
     root = TreeNode("QUERY")
+    
+    # DISTINCT marker
+    if ast_node.get('distinct'):
+        root.add_child(TreeNode("DISTINCT", value="DISTINCT"))
     
     # SELECT clause
     select_node = TreeNode("SELECT")
     columns = ast_node.get('columns', [])
     
-    if columns == ['*']:
+    if columns and isinstance(columns[0], dict) and columns[0].get('expr') == '*':
+        select_node.add_child(TreeNode("*", value="*"))
+    elif columns == ['*']:
         select_node.add_child(TreeNode("*", value="*"))
     else:
         columns_node = TreeNode("COLUMNS")
         for col in columns:
-            columns_node.add_child(TreeNode(str(col), value=str(col)))
+            display = _get_col_display(col)
+            columns_node.add_child(TreeNode(display, value=display))
         select_node.add_child(columns_node)
     
     root.add_child(select_node)
     
-    # FROM clause
-    from_node = TreeNode("FROM")
+    # FROM clause (handles table_refs dict with joins)
     table = ast_node.get('table', '')
-    from_node.add_child(TreeNode(str(table), value=str(table)))
+    from_node = TreeNode("FROM")
+    
+    if isinstance(table, dict):
+        # Advanced table_refs structure
+        tbl_name = table.get('name', '')
+        tbl_alias = table.get('alias', '')
+        tbl_display = f"{tbl_name} {tbl_alias}" if tbl_alias else tbl_name
+        from_node.add_child(TreeNode(tbl_display, value=tbl_display))
+        
+        # JOINs
+        joins = table.get('joins', [])
+        for join in joins:
+            join_node = TreeNode("JOIN")
+            jtbl = join.get('table', {})
+            jname = jtbl.get('name', '') if isinstance(jtbl, dict) else str(jtbl)
+            jalias = jtbl.get('alias', '') if isinstance(jtbl, dict) else ''
+            jdisplay = f"{jname} {jalias}" if jalias else jname
+            join_node.add_child(TreeNode(jdisplay, value=jdisplay))
+            
+            on_cond = join.get('on', {})
+            if on_cond:
+                on_node = TreeNode("ON")
+                left = on_cond.get('left', '')
+                right = on_cond.get('right', '')
+                on_node.add_child(TreeNode(str(left), value=str(left)))
+                on_node.add_child(TreeNode("=", value="="))
+                on_node.add_child(TreeNode(str(right), value=str(right)))
+                join_node.add_child(on_node)
+            
+            from_node.add_child(join_node)
+    else:
+        from_node.add_child(TreeNode(str(table), value=str(table)))
+    
     root.add_child(from_node)
     
     # WHERE clause (optional)
@@ -96,6 +147,35 @@ def _build_select_tree(ast_node):
         condition_tree = _build_condition_tree(condition)
         where_node.add_child(condition_tree)
         root.add_child(where_node)
+    
+    # GROUP BY clause (optional)
+    group_by = ast_node.get('group_by', None)
+    if group_by:
+        group_node = TreeNode("GROUP BY")
+        for item in group_by:
+            group_node.add_child(TreeNode(str(item), value=str(item)))
+        root.add_child(group_node)
+    
+    # HAVING clause (optional)
+    having = ast_node.get('having', None)
+    if having:
+        having_node = TreeNode("HAVING")
+        having_tree = _build_condition_tree(having)
+        having_node.add_child(having_tree)
+        root.add_child(having_node)
+    
+    # ORDER BY clause (optional)
+    order_by = ast_node.get('order_by', None)
+    if order_by:
+        order_node = TreeNode("ORDER BY")
+        for item in order_by:
+            if isinstance(item, dict):
+                col = item.get('column', '')
+                direction = item.get('direction', 'ASC')
+                order_node.add_child(TreeNode(f"{col} {direction}", value=f"{col} {direction}"))
+            else:
+                order_node.add_child(TreeNode(str(item), value=str(item)))
+        root.add_child(order_node)
     
     return root
 
@@ -121,7 +201,7 @@ def _build_insert_tree(ast_node):
 
 
 def _build_condition_tree(condition):
-    """Build parse tree for a WHERE condition (recursive for AND/OR)."""
+    """Build parse tree for a WHERE/HAVING condition (recursive for AND/OR)."""
     if condition is None:
         return TreeNode("EMPTY")
     
@@ -156,27 +236,26 @@ def tree_to_string(node, prefix="", is_last=True, is_root=True):
     """
     Convert a TreeNode to a formatted string with tree connectors.
     
-    Args:
-        node (TreeNode): The node to display
-        prefix (str): Current line prefix for indentation
-        is_last (bool): Whether this is the last child
-        is_root (bool): Whether this is the root node
-    
-    Returns:
-        str: Formatted tree string
-    
     Example Output:
         QUERY
         ├── SELECT
-        │   ├── name
-        │   └── age
+        │   ├── s.name
+        │   └── s.age
         ├── FROM
-        │   └── students
-        └── WHERE
-            └── CONDITION
-                ├── age
-                ├── >
-                └── 18
+        │   ├── students s
+        │   └── JOIN
+        │       ├── courses c
+        │       └── ON
+        │           ├── s.course_id
+        │           ├── =
+        │           └── c.course_id
+        ├── WHERE
+        │   └── CONDITION
+        │       ├── s.age
+        │       ├── >
+        │       └── 18
+        └── ORDER BY
+            └── s.name ASC
     """
     lines = []
     
@@ -208,15 +287,7 @@ def tree_to_string(node, prefix="", is_last=True, is_root=True):
 
 
 def tree_to_dict(node):
-    """
-    Convert a TreeNode to a nested dictionary for JSON/display.
-    
-    Args:
-        node (TreeNode): The node to convert
-    
-    Returns:
-        dict: Nested dictionary representation
-    """
+    """Convert a TreeNode to a nested dictionary for JSON/display."""
     result = {
         'name': node.name,
         'value': node.value,
@@ -248,17 +319,42 @@ def get_tree_node_count(node):
 #  Module test
 # ============================================================
 if __name__ == '__main__':
-    # Test with a sample AST
+    # Test with advanced AST
     sample_ast = {
         'type': 'SELECT',
-        'columns': ['name', 'age'],
-        'table': 'students',
+        'distinct': False,
+        'columns': [
+            {'expr': 's.name', 'alias': None},
+            {'expr': 's.age', 'alias': None},
+            {'expr': 'AVG(s.marks)', 'alias': 'avg_marks', 'is_agg': True},
+        ],
+        'table': {
+            'name': 'students',
+            'alias': 's',
+            'joins': [
+                {
+                    'type': 'JOIN',
+                    'table': {'name': 'courses', 'alias': 'c', 'joins': []},
+                    'on': {'type': 'JOIN_COND', 'left': 's.course_id', 'right': 'c.course_id'},
+                }
+            ],
+        },
         'condition': {
             'type': 'COMPARISON',
-            'left': 'age',
+            'left': 's.age',
             'operator': '>',
-            'right': 18
-        }
+            'right': 18,
+        },
+        'group_by': ['s.department'],
+        'having': {
+            'type': 'COMPARISON',
+            'left': 'AVG(s.marks)',
+            'operator': '>',
+            'right': 60,
+        },
+        'order_by': [
+            {'column': 's.name', 'direction': 'ASC'},
+        ],
     }
     
     tree = build_tree_from_ast(sample_ast)
