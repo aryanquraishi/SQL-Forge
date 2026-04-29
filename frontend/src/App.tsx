@@ -139,7 +139,7 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-screen w-[280px] bg-card border-r border-border flex flex-col py-5 shadow-2xl z-50 md:hidden"
+              className="fixed top-0 left-0 h-screen w-[280px] bg-white dark:bg-[#0a0a0a] border-r border-border flex flex-col py-5 shadow-2xl z-50 md:hidden"
             >
               <div className="px-5 mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -216,7 +216,7 @@ export default function App() {
         </header>
 
         {/* Canvas */}
-        <main className="flex-1 p-4 md:p-6 flex flex-col gap-6 overflow-y-auto pb-24 md:pb-6">
+        <main className="flex-1 p-4 md:p-6 flex flex-col gap-6 overflow-y-auto pb-6">
           {/* Editor — only when Query Editor is selected */}
           {activeNav === 'editor' && (
             <div id="editor-section" className="bg-[#0D1117] rounded-xl border border-border shadow-lg overflow-hidden flex flex-col">
@@ -314,9 +314,9 @@ export default function App() {
               <div id="intermediate" className="space-y-2">
                 {result.grammar_trace?.length > 0 && (
                   <Details title="CFG Rules Trace" icon={Gauge} sectionKey="cfg" openSection={openSection} setOpenSection={setOpenSection}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-hidden">
                       <div className="bg-muted/50 rounded p-2 overflow-auto max-h-[250px]">
-                        <table className="w-full font-mono text-xs border-collapse border border-border/40">
+                        <table className="w-full font-mono text-[10px] sm:text-xs border-collapse border border-border/40 table-fixed">
                           <thead className="bg-muted/30"><tr><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Non-Terminal</th><th className="text-left px-2 py-1.5 text-muted-foreground border border-border/40">Production</th></tr></thead>
                           <tbody>{result.grammar_rules?.map((r: string, i: number) => {
                             const parts = r.split('→')
@@ -353,8 +353,8 @@ export default function App() {
                 )}
                 {result.parsing_table?.length > 0 && (
                   <Details title="LALR Parsing Table" icon={Grid3X3} sectionKey="lalr" openSection={openSection} setOpenSection={setOpenSection}>
-                    <div className="overflow-x-auto">
-                      <table className="w-full font-mono text-xs border-collapse border border-border/40 min-w-[500px]">
+                    <div className="overflow-x-auto -mx-3 px-3">
+                      <table className="w-full font-mono text-[10px] sm:text-xs border-collapse border border-border/40 min-w-[400px]">
                         <thead className="bg-muted/30"><tr>{Object.keys(result.parsing_table[0]).map(k => <th key={k} className="text-left px-3 py-2 text-muted-foreground border border-border/40 font-bold uppercase text-[10px] tracking-wider">{k}</th>)}</tr></thead>
                         <tbody>{result.parsing_table.map((row: any, i: number) => <tr key={i} className="hover:bg-muted/10">{Object.entries(row).map(([k, v], j) => {
                           const val = String(v || '')
@@ -418,17 +418,17 @@ export default function App() {
       {/* AI Chat — Floating Icon + Panel */}
       {!aiOpen && (
         <button onClick={() => setAiOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-3 md:right-6 z-50 w-10 h-10 md:w-14 md:h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform">
+          className="fixed bottom-6 right-4 md:right-6 z-50 w-12 h-12 md:w-14 md:h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform">
           <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
         </button>
       )}
       {aiOpen && (
-        <div className="fixed inset-4 md:inset-auto md:bottom-6 md:right-6 z-50 md:w-[340px] md:h-[480px] bg-card rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 z-50 md:w-[340px] md:h-[480px] bg-white dark:bg-[#0a0a0a] md:bg-card md:dark:bg-card md:rounded-2xl border-0 md:border border-border shadow-2xl flex flex-col overflow-hidden">
           {/* Fun Confetti Background */}
           <div className="absolute inset-0 pointer-events-none opacity-50"><ConfettiBackground /></div>
 
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent z-10" />
-          <div className="relative z-10 p-3 border-b border-border flex items-center justify-between bg-card/90 backdrop-blur-sm">
+          <div className="relative z-10 p-3 border-b border-border flex items-center justify-between bg-white dark:bg-[#0a0a0a] md:bg-card/90 md:backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary" />
@@ -444,7 +444,7 @@ export default function App() {
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div ref={chatRef} className="relative z-10 flex-1 p-3 overflow-y-auto space-y-3 flex flex-col bg-card/40 backdrop-blur-sm">
+          <div ref={chatRef} className="relative z-10 flex-1 p-3 overflow-y-auto space-y-3 flex flex-col bg-gray-50 dark:bg-[#111111] md:bg-card/40 md:backdrop-blur-sm">
             {chatMessages.map((msg, i) => (
               <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 {msg.role === 'assistant' && (
@@ -498,7 +498,7 @@ export default function App() {
               </div>
             )}
           </div>
-          <div className="relative z-10 p-3 bg-card/90 backdrop-blur-sm border-t border-border">
+          <div className="relative z-10 p-3 bg-white dark:bg-[#0a0a0a] md:bg-card/90 md:backdrop-blur-sm border-t border-border">
             <PromptInput
               placeholder="Ask about compiler design..."
               onSubmit={(value) => {
@@ -520,18 +520,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Mobile Bottom Nav — LimelightNav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-2 pt-1 bg-gradient-to-t from-background via-background/95 to-transparent">
-        <LimelightNav
-          className="bg-card/95 dark:bg-card/90 backdrop-blur-xl border border-border shadow-2xl rounded-2xl"
-          items={[
-            { id: 'editor', icon: <Code />, label: 'Editor', onClick: () => { setActiveNav('editor'); window.scrollTo({ top: 0, behavior: 'smooth' }) } },
-            { id: 'pipeline', icon: <ListTree />, label: 'Results', onClick: () => { if (result) setActiveNav('tokens') } },
-            { id: 'menu', icon: <Menu />, label: 'Menu', onClick: () => setSideOpen(true) },
-            { id: 'ai', icon: <BrainCircuit />, label: 'AI', onClick: () => setAiOpen(true) },
-          ]}
-        />
-      </div>
+      {/* Mobile Bottom Nav removed — hamburger menu + floating AI chat button handle everything */}
     </div>
   )
 }
