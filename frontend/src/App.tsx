@@ -269,7 +269,7 @@ export default function App() {
               {/* Bento Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <BentoCard title="TOKEN STREAM" icon={Segment} id="tokens">
-                  <div className="space-y-1 font-mono text-xs max-h-[200px] overflow-auto">
+                  <div className="space-y-1 font-mono text-xs max-h-[200px] overflow-auto pr-2">
                     {result.tokens?.map((t, i) => (
                       <div key={i} className="flex justify-between">
                         <span className="text-muted-foreground">[{t.category?.substring(0, 3)}]</span>
@@ -279,7 +279,7 @@ export default function App() {
                   </div>
                 </BentoCard>
                 <BentoCard title="PARSE TREE" icon={ListTree} id="tree">
-                  <pre className="font-mono text-xs whitespace-pre overflow-auto max-h-[200px] text-foreground">{result.parse_tree_str || '(no tree)'}</pre>
+                  <pre className="font-mono text-xs whitespace-pre overflow-auto max-h-[200px] text-foreground pr-2">{result.parse_tree_str || '(no tree)'}</pre>
                 </BentoCard>
                 <BentoCard title="SYMBOL TABLE" icon={KeyRound} id="symbols" badge="Live">
                   <table className="w-full text-left font-mono text-[11px]">
