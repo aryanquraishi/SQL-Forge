@@ -12,7 +12,7 @@ from parser import parse_query, get_grammar_rules
 from syntax_tree import build_tree_from_ast, tree_to_string, get_tree_depth, get_tree_node_count
 from symbol_table import build_symbol_table_from_ast, SymbolTable
 from intermediate import generate_postfix, get_postfix_steps, TACGenerator, generate_quadruples, generate_triples
-from grammar_analysis import compute_first_sets, compute_follow_sets, format_first_sets, format_follow_sets, generate_parsing_table
+from grammar_analysis import compute_first_sets, compute_follow_sets, format_first_sets, format_follow_sets, generate_parsing_table, generate_parsing_table_for_query
 from errors import ErrorCollector
 
 
@@ -106,21 +106,23 @@ class MiniSQLCompiler:
             result.symbol_table_data = st.get_as_list()
         result.step_times['symbol_table'] = (time.time() - s) * 1000
         
-        # STEP 5: FIRST & FOLLOW Sets
-        s = time.time()
-        first = compute_first_sets()
-        follow = compute_follow_sets(first)
-        result.first_sets = format_first_sets(first)
-        result.follow_sets = format_follow_sets(follow)
-        result.step_times['first_follow'] = (time.time() - s) * 1000
-        
-        # STEP 6: Parsing Table
-        s = time.time()
-        result.parsing_table = generate_parsing_table()
-        result.step_times['parsing_table'] = (time.time() - s) * 1000
-        
-        # Steps 7-10 only if valid
+        # Steps 5-10 only if valid — grammar analysis is query-specific
         if result.is_valid and ast:
+            query_type = ast.get('type', 'SELECT')
+            
+            # STEP 5: FIRST & FOLLOW Sets (filtered by query type)
+            s = time.time()
+            first = compute_first_sets()
+            follow = compute_follow_sets(first)
+            result.first_sets = format_first_sets(first, query_type=query_type)
+            result.follow_sets = format_follow_sets(follow, query_type=query_type)
+            result.step_times['first_follow'] = (time.time() - s) * 1000
+            
+            # STEP 6: Dynamic Parsing Table (query-type-specific)
+            s = time.time()
+            result.parsing_table = generate_parsing_table_for_query(query_type)
+            result.step_times['parsing_table'] = (time.time() - s) * 1000
+            
             # STEP 7: Parse Tree
             s = time.time()
             tree_node = build_tree_from_ast(ast)

@@ -441,6 +441,21 @@ def parse_query(query):
 
         parsed = parsed_list[0]
 
+        # ── Layer 2.5: Statement type validation ──
+        # Only proper SQL statements are valid — reject bare expressions,
+        # identifiers, literals, column refs, etc.
+        VALID_STATEMENT_TYPES = (
+            exp.Select, exp.Insert, exp.Update, exp.Delete,
+            exp.Create, exp.Drop, exp.Alter, exp.Command,
+        )
+        if not isinstance(parsed, VALID_STATEMENT_TYPES):
+            node_kind = type(parsed).__name__
+            parse_errors.add_syntax_error(
+                message=f"Not a valid SQL statement — '{cleaned}' was parsed as a bare {node_kind}, not a query",
+                hint="A valid SQL query must start with SELECT, INSERT, UPDATE, DELETE, or CREATE. Example: SELECT name FROM students WHERE age > 18"
+            )
+            return None, list(grammar_trace), parse_errors
+
         # ── Layer 3: Round-trip token verification ──
         roundtrip_error = _roundtrip_verify(cleaned, parsed)
         if roundtrip_error:
@@ -465,16 +480,12 @@ def parse_query(query):
         elif isinstance(parsed, exp.Create):
             result = _convert_create(parsed)
         else:
-            result = {
-                'type': type(parsed).__name__.upper(),
-                'sql': parsed.sql(),
-                'columns': [],
-                'table': '',
-                'condition': None,
-                'group_by': None,
-                'having': None,
-                'order_by': None,
-            }
+            # Catch-all for valid statement types not yet fully supported
+            parse_errors.add_syntax_error(
+                message=f"Unsupported SQL statement type: {type(parsed).__name__}",
+                hint="Currently supported: SELECT, INSERT, UPDATE, DELETE, CREATE"
+            )
+            return None, list(grammar_trace), parse_errors
 
         return result, list(grammar_trace), parse_errors
 

@@ -28,7 +28,7 @@ html.light .bg-\[\#121416\]\/80,html.light .bg-\[\#121416\]\/60{background:rgba(
 html.light .bg-\[\#0a0a0a\]{background:#2e3230!important}
 html.light .bg-\[\#121416\]{background:#faf6f0!important}
 html.light .bg-\[\#1c1e21\]{background:#eae6de!important}
-html.light .bg-\[\#1c2e21]\/50{background:rgba(200,232,208,.3)!important}
+html.light .bg-\[\#1c2e21\]\/50{background:rgba(200,232,208,.3)!important}
 html.light .bg-\[\#1c2e21\]{background:rgba(200,232,208,.5)!important}
 html.light .bg-black\/40{background:rgba(46,50,48,.06)!important}
 html.light .border-\[\#ffffff0a\]{border-color:rgba(196,200,188,.4)!important}
@@ -48,6 +48,16 @@ html.light .theme-thumb{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .theme-switch input:checked~.theme-thumb{transform:translateX(40px)}
 .theme-icon{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;transition:opacity .2s,transform .2s}
 .theme-icon-sun{left:8px}.theme-icon-moon{right:8px}
+
+/* === AI Chat Panel === */
+#aiBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:60;opacity:0;pointer-events:none;transition:opacity .3s ease}
+#aiBackdrop.open{opacity:1;pointer-events:auto}
+#aiSection{position:fixed;right:-400px;top:0;bottom:0;width:360px;max-width:90vw;z-index:70;transition:right .35s cubic-bezier(.4,0,.2,1);border-radius:0}
+#aiSection.open{right:0}
+@media(max-width:768px){#aiSection{width:100%;max-width:100%;right:-100%}}
+#aiFloatBtn{position:fixed;bottom:80px;right:20px;z-index:55;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#4a7c59,#3a6249);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(74,124,89,.4);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}
+#aiFloatBtn:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(74,124,89,.5)}
+@media(min-width:768px){#aiFloatBtn{bottom:24px;right:24px}}
 </style>
 </head>
 <body class="font-body text-[#d8f0de] h-screen flex overflow-hidden">
@@ -79,7 +89,7 @@ html.light .theme-thumb{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 <span class="material-symbols-outlined">vpn_key</span><span>Symbol Table</span></a>
 <a class="flex items-center gap-3 px-4 py-3 text-stone-400 hover:text-stone-200 hover:bg-white/5 transition-colors" href="#intermediateSection">
 <span class="material-symbols-outlined">code</span><span>Intermediate Code</span></a>
-<a class="flex items-center gap-3 px-4 py-3 text-stone-400 hover:text-stone-200 hover:bg-white/5 transition-colors" href="#aiSection">
+<a class="flex items-center gap-3 px-4 py-3 text-stone-400 hover:text-stone-200 hover:bg-white/5 transition-colors cursor-pointer" onclick="openAiChat()">
 <span class="material-symbols-outlined">auto_awesome</span><span>Terra AI</span></a>
 </div>
 <div class="px-4 mt-auto space-y-1 border-t border-[#ffffff0a] pt-4">
@@ -223,18 +233,30 @@ html.light .theme-thumb{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 </div>
 </div>
 
-<!-- Right: AI Panel -->
-<aside id="aiSection" class="w-full lg:w-80 bg-[#121416]/60 backdrop-blur-2xl rounded-2xl border border-[#ffffff0a] shadow-2xl flex flex-col shrink-0 overflow-hidden relative max-h-[500px] lg:max-h-none">
+<!-- AI Chat Backdrop (click to close) -->
+<div id="aiBackdrop" onclick="closeAiChat()"></div>
+</main>
+
+<!-- AI Floating Button -->
+<button id="aiFloatBtn" onclick="toggleAiChat()" title="Open Terra AI">
+<span class="material-symbols-outlined">auto_awesome</span>
+</button>
+
+<!-- AI Chat Panel (slides from right) -->
+<aside id="aiSection" class="bg-[#121416] backdrop-blur-2xl border-l border-[#ffffff0a] shadow-2xl flex flex-col overflow-hidden">
 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#4a7c59]/50 to-transparent"></div>
 <div class="p-4 border-b border-[#ffffff0a] flex items-center gap-3 bg-[#121416]/80">
 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1c2e21] to-[#121416] border border-[#4a7c59]/30 flex items-center justify-center">
 <span class="material-symbols-outlined text-[16px] text-[#4a7c59]">auto_awesome</span>
 </div>
-<div>
+<div class="flex-1">
 <h3 class="font-headline font-bold text-white text-base leading-tight">Terra AI</h3>
 <p class="text-[10px] text-[#4a7c59]/80 font-mono flex items-center gap-1">
 <span class="w-1.5 h-1.5 rounded-full bg-[#4a7c59] animate-pulse inline-block"></span>Online</p>
 </div>
+<button onclick="closeAiChat()" class="p-1.5 rounded-lg hover:bg-white/10 text-stone-400 hover:text-white transition-colors" title="Close">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
 </div>
 <div class="flex-1 p-3 overflow-y-auto space-y-3 flex flex-col" id="chatMessages">
 <div class="flex gap-2">
@@ -252,7 +274,7 @@ Hi! I'm Terra AI. Ask me about Compiler Design concepts or this project.</div>
 </div>
 </div>
 </aside>
-</main>
+
 </div>
 
 <!-- Mobile Bottom Nav -->
@@ -263,7 +285,7 @@ Hi! I'm Terra AI. Ask me about Compiler Design concepts or this project.</div>
 <span class="material-symbols-outlined mb-0.5">account_tree</span>Pipeline</a>
 <a href="#symbolSection" class="flex flex-col items-center text-stone-500 text-[10px]">
 <span class="material-symbols-outlined mb-0.5">list_alt</span>Symbols</a>
-<a href="#aiSection" class="flex flex-col items-center text-stone-500 text-[10px]">
+<a onclick="openAiChat()" class="flex flex-col items-center text-stone-500 text-[10px] cursor-pointer">
 <span class="material-symbols-outlined mb-0.5">psychology</span>Terra AI</a>
 </nav>
 
@@ -287,6 +309,27 @@ function toggleTheme(isDark){
     if(cb)cb.checked=false;
   }
 })();
+
+// AI Chat Panel — open/close/toggle
+function openAiChat(){
+  document.getElementById('aiSection').classList.add('open');
+  document.getElementById('aiBackdrop').classList.add('open');
+  document.getElementById('aiFloatBtn').style.display='none';
+  setTimeout(()=>document.getElementById('chatInput').focus(),400);
+}
+function closeAiChat(){
+  document.getElementById('aiSection').classList.remove('open');
+  document.getElementById('aiBackdrop').classList.remove('open');
+  document.getElementById('aiFloatBtn').style.display='flex';
+}
+function toggleAiChat(){
+  const panel=document.getElementById('aiSection');
+  panel.classList.contains('open')?closeAiChat():openAiChat();
+}
+// Close on Escape key
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeAiChat();
+});
 </script>
 </body>
 </html>

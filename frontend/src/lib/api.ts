@@ -11,7 +11,7 @@ export interface CompileResult {
   grammar_trace: Array<{ production: string }>;
   first_sets: string[][];
   follow_sets: string[][];
-  parsing_table: Record<string, string>[];
+  parsing_table: Record<string, any>[];
   parse_tree_str: string;
   parse_tree_svg: string | null;
   tree_depth: number;

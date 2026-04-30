@@ -1,0 +1,93 @@
+=============================================================================
+                  SQLFORGE (MINI SQL COMPILER) - PROJECT DETAILS
+=============================================================================
+
+1. PROJECT OVERVIEW
+-----------------------------------------------------------------------------
+Project Name: SQLForge (Mini SQL Compiler)
+Purpose: Ye ek web-based visual compiler tool hai jo SQL queries ko analyze karta hai. Iska main kaam sirf query run karna nahi hai, balki "Compiler Design" ke saare phases (Lexical Analysis, Syntax Analysis, Intermediate Code) ko visually dikhana hai. 
+
+2. LANGUAGES USED & WHY (Kaun si language use hui aur kyu)
+-----------------------------------------------------------------------------
+1. PYTHON (Backend & Core Compiler Logic): 
+   - Kyu?: Compiler design ke liye Python best hai kyunki isme string manipulation, regex (regular expressions), aur trees banana aasan hota hai. Sath hi PLY aur sqlglot jaise powerful packages easily available hain.
+
+2. TYPESCRIPT / REACT (Frontend UI):
+   - Kyu?: Ek modern, fast aur dynamic user interface banane ke liye jisme page refresh na ho. TypeScript code ko error-free rakhta hai (strongly typed) aur React components (BentoCards, Tables) ko reuse karne me madad karta hai.
+
+3. TAILWIND CSS (Styling):
+   - Kyu?: Design ko modern, glassmorphism look dene ke liye aur mobile devices ke hisaab se responsive banane ke liye (taaki phone aur PC dono par perfect dikhe).
+
+
+3. PROJECT ARCHITECTURE & FLOW (Kaise aur Kahan se kaam ho raha hai)
+-----------------------------------------------------------------------------
+Jaisa hi user "Run" button dabata hai, ye flow execute hota hai:
+
+[FRONTEND] 
+1. React (`frontend/src/App.tsx`) user ki query ko uthata hai aur ek API request (`/api/compile`) ke through Python server ko bhejta hai.
+
+[BACKEND PIPELINE - compiler.py]
+2. `compiler.py` is pure process ka "Manager" hai. Ye query receive karta hai aur step-by-step dusri files ko pass karta hai:
+   
+   A) LEXICAL ANALYSIS (`lexer.py`)
+      - Query ko chhote "Tokens" me todta hai (e.g., SELECT, IDENTIFIER, NUMBER).
+      - Agar koi ajeeb character (jaise @, $) aaya jo SQL me valid nahi hai, toh Lexical Error deta hai.
+
+   B) SYNTAX ANALYSIS (`parser.py`)
+      - Tokens ko check karta hai ki kya unhone sahi SQL grammar banai hai? (e.g. SELECT ke baad FROM aana chahiye).
+      - Ye 3-Layer Validation use karta hai:
+        1. Pre-validation (Custom Regex to catch missing commas, quotes).
+        2. Strict Parsing (`sqlglot` library ke through).
+        3. Roundtrip Verification (Toh check agar kuch tokens silently drop hue).
+
+   C) SYMBOL TABLE (`symbol_table.py`)
+      - Query me jitne bhi Variables, Column names, aur Table names use hue hain, unki ek dictionary/table banata hai (Scope, Type ke sath).
+
+   D) GRAMMAR SETS (`grammar_analysis.py`)
+      - CFG (Context Free Grammar) ke base par FIRST Sets, FOLLOW Sets aur LALR Parsing Table generate karta hai.
+
+   E) PARSE TREE (`syntax_tree.py` & `tree_visualizer.py`)
+      - Parser se mile hue AST (Abstract Syntax Tree) ko ek hierarchical structure me convert karta hai.
+      - `tree_visualizer.py` us data ko lekar ek beautiful SVG (Graphical Diagram) draw karta hai.
+
+   F) INTERMEDIATE CODE GENERATION (`intermediate.py`)
+      - Machine ke samajhne layak code banata hai:
+        - Postfix Notation
+        - Three Address Code (TAC)
+        - Quadruples & Triples
+
+[AI ASSISTANT]
+3. Agar user AI button dabata hai, toh request `ai_assistant.py` me jati hai, jo Groq API (Llama3 model) se connect karke SQL related doubts solve karta hai.
+
+[RESPONSE TO FRONTEND]
+4. Saara data (Tokens, Errors, SVG, TAC) ek JSON object me pack hokar wapas React ko bheja jata hai, jo use UI me render kar deta hai.
+
+
+4. PACKAGES / DEPENDENCIES IMPORTED (Kya imports hue aur kya kaam kar rahe)
+-----------------------------------------------------------------------------
+[PYTHON PACKAGES - requirements.txt]
+1. `Flask`: Web framework. API server create karta hai jo React se requests receive karta hai.
+2. `flask-cors`: Security policy bypass karne ke liye taaki React (localhost:5173) Flask (localhost:5000) se data mangwa sake.
+3. `ply` (Python Lex-Yacc): Lexical analysis tool. Iska `lex` module use karke humne regex rules define kiye hain jo text ko tokens me convert karte hain.
+4. `sqlglot`: Ek extremely powerful aur strict SQL parser. Iska use Abstract Syntax Tree (AST) banane aur deep syntax errors catch karne ke liye hota hai.
+5. `groq`: AI Chatbot ke liye. Ye library Groq ke fast AI models (Llama 3) ko query bhejti hai aur response laati hai.
+6. `python-dotenv`: Environment variables (.env) ko read karne ke liye taaki API Keys (jaise GROQ_API_KEY) ko code me hardcode na karna pade (for security).
+
+[REACT PACKAGES - package.json]
+1. `react` / `react-dom`: Core library UI components banane ke liye.
+2. `vite`: Ek superfast build tool jo frontend ko run karta hai aur bundle banata hai.
+3. `lucide-react`: UI me jitne bhi SVG icons (Play button, Hamburger menu, Chat icon) dikh rahe hain, wo is library se aa rahe hain.
+4. `framer-motion`: AI Chatbot ki floating window, buttons ka dabna, aur sections ke open/close hone wali smooth animations ke liye.
+5. `tailwind-merge` & `clsx`: Tailwind CSS ki classes ko dynamic aur conditional tarike se jodne ke liye (taaki styles clash na ho).
+
+5. KEY FILES DETAILED BREAKDOWN
+-----------------------------------------------------------------------------
+- `app.py`: Backend ka "Door" (Entry point). API Routes define karta hai.
+- `compiler.py`: Backend ka "Brain". Saari files ko ek sequence me chalata hai.
+- `errors.py`: Ek central error collector class jo Lexical aur Syntax dono errors ko ek jagah jama karke frontend ko bhejti hai.
+- `frontend/src/App.tsx`: Main UI page jisme poori website ka design aur layout likha hai. (React code).
+- `frontend/src/index.css`: Global styles, jisme `.custom-scrollbar` wala mobile scrolling fix bhi maujood hai.
+
+=============================================================================
+END OF DOCUMENTATION
+=============================================================================
